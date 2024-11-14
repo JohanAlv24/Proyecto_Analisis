@@ -1,0 +1,129 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.2;
+    background-color: #ECF0F1;
+    color: #34495E;
+}
+
+h1{
+    font-size: xx-large;
+    margin-bottom: 25px;
+    color: #34495E;
+    text-align: center;
+}
+
+details {
+    background: #1ABC9C;
+    padding: .5rem;
+    border-radius: 6px;
+    margin: .5rem;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+summary {
+    list-style: none;
+    display: flex;
+    align-items: center; /* Alinea verticalmente los elementos dentro de summary */
+}
+
+.icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    margin-right: 1rem;
+}
+
+details summary .icon {
+    background-image: url('../flecha-abajo.png');
+    width: 11px;
+    height: 11px;
+}
+
+details[open] summary .icon {
+    background-image: url('../flecha-arriba.png');
+    width: 16px;
+    height: 16px;
+}
+
+ul {
+    list-style-type: disc; /* Asegura que las listas tengan viñetas */
+    padding-left: 20px; /* Añade espacio antes de las viñetas */
+    margin-left: 25px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+li{
+    margin-bottom: 15px;
+    color: #FFFFFF;
+}
+
+.form-container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #FFFFFF;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+p {
+    font-size: medium;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.p-n{
+    font-weight: bold;
+}
+
+.derivative-container p {
+    font-size: medium;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.derivative-container form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.derivative-container label {
+    margin-bottom: 5px;
+}
+
+.derivative-container input[type="text"] {
+    width: 70%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.derivative-container button[type="submit"] {
+    background: #1ABC9C;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: medium;
+}
+
+.derivative-container button[type="submit"]:hover {
+    background: #16A085;
+}
+
+.derivative-container #result {
+    margin-top: 20px;
+}
+
+.derivative-container #result p {
+    font-size: medium;
+    text-align: center;
+}

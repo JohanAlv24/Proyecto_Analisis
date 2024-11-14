@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado SOR</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/resultado_2.css') }}">
+</head>
+{% extends "base.html" %}
+ 
+<body>
+    {% block content %}
+    <h1>Resultado de SOR</h1>
+        <p>
+            {%if length != 0%}
+            {% for val in xi[length-1] %}
+            {{ val }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+            {% endif %}
+            {{ r }}
+        </p>
+        {%if length != 0%}
+        <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th rowspan="2">N</th>
+                    <th colspan="{{ xi[0]|length }}">Valores de xi</th>
+                    <th rowspan="2">E</th>
+                </tr>
+                <tr>
+                    {% for i in range(xi[0]|length) %}
+                    <th>x{{ i + 1 }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in range(length) %}
+                <tr>
+                    <td>{{ n[i] }}</td>
+                    {% for val in xi[i] %}
+                    <td>{{ val }}</td>
+                    {% endfor %}
+                    <td>{{ E[i] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <br>
+        <form action="gaussSeidel/descargar" method="post">
+            <button type="submit">Descargar</button>
+        </form>
+    </div>
+ 
+    <div class="result-container">
+        <h1>Solución Sistema de Ecuaciones Ax=b</h1>
+        <div class="image-container">
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <img src="{{ imagen_path }}" alt="Imagen">
+                    <p>{{radio}}</p>
+                </div>
+            </div>
+        </div>    
+    </div>
+    {% endif %}
+    {% endblock %}
+</body>
+</html>
