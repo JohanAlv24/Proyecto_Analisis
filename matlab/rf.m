@@ -1,102 +1,108 @@
-function [respuesta] = ReglaFalsa(func,x0,x1,Tol,niter,Terror)
+function [respuesta] = ReglaFalsa(func, x0, x1, Tol, niter, Terror)
 
-    f = str2func(['@(x)' func]);
-    c=0;
-    xi(c+1)=x0;
-    xs(c+1)=x1;
-    fi(c+1)=eval(subs(f,x0));
-    fs(c+1)=eval(subs(f,x1));
-    %raíces inmediatas
-    if fi(c+1)==0
-        xm(c+1)=xi(c+1);
-        fm(c+1)=eval(subs(f,xm(c+1)));
-        E(c+1)=0;
-        respuesta=sprintf('el límite inferior %f es raiz de f(x)',xi(c+1))
-        T = table((0:1:c)', xm', xi', xs', fm', fi' , fs', E', VariableNames=["n","x_m","x_i","x_s","f_m","f_i","f_s","E"]);
-    elseif fs(c+1)==0
-        xm(c+1)=xs(c+1);
-        fm(c+1)=eval(subs(f,xm(c+1)));
-        E(c+1)=0;
-        respuesta=sprintf('el límite superior %f es raiz de f(x)',xs(c+1))
-        T = table((0:1:c)', xm', xi', xs', fm', fi' , fs', E', VariableNames=["n","x_m","x_i","x_s","f_m","f_i","f_s","E"]);
-    %certeza de raíz
-    elseif fs(c+1)*fi(c+1)<0
-        fi(c+1)=eval(subs(f,xi));
-        fs(c+1)=eval(subs(f,xs));
-        %hallamos la pendiente
-        p=(fs(c+1)-fi(c+1))/(xs(c+1)-xi(c+1));
-        %despejamos x
-        xm(c+1)=(p*xi(c+1)-fi(c+1))/p;
-        fm(c+1)=eval(subs(f,xm(c+1)));
-        fe=fm(c+1);
-        E(c+1)=Tol+1;
-        error=E(c+1);
-        while error>Tol && fe~=0 && c<niter
-            %verificamos quien es el x_ que debe actualizarse
-            if fi(c+1)*fe<0
-                xs(c+2)=xm(c+1);
-                fs(c+2)=eval(subs(f,xs(c+2)));
-                xi(c+2)=xi(c+1);
-                fi(c+2)=fi(c+1);
-            else
-                xi(c+2)=xm(c+1);
-                fi(c+2)=eval(subs(f,xi(c+2)));
-                xs(c+2)=xs(c+1);
-                fs(c+2)=fs(c+1);
-            end
-            %hallamos la pendiente
-            p=(fs(c+2)-fi(c+2))/(xs(c+2)-xi(c+2));
-            %despejamos x
-            xm(c+2)=(p*xi(c+2)-fi(c+2))/p;
-            fm(c+2)=eval(subs(f,xm(c+2)));
-            fe=fm(c+2);
-            if strcmp(Terror, 'Decimales Correctos')
-                E(c+2)=abs(xm(c+2)-xm(c+1));
-            else
-                E(c+2)=abs((xm(c+2)-xm(c+1))/xm(c+2));
-            end
-            error=E(c+2);
-            c=c+1;
-        end
-        if fe==0 
-           respuesta=sprintf('%f es raiz exacta de f(x), lograda en en %d iteraciones',xm(c+1),c)
-           E(c+2)=0
-            T = table((0:1:c)', xm', xi', xs', fm', fi' , fs', E', VariableNames=["n","x_m","x_i","x_s","f_m","f_i","f_s","E"]);
-        elseif error<Tol
-           respuesta=sprintf('\n%f es una aproximación de una raiz de f(x) con una tolerancia= %f en %d iteraciones',xm(c+1),Tol,c)
-            T = table((0:1:c)', xm', xi', xs', fm', fi' , fs', E', VariableNames=["n","x_m","x_i","x_s","f_m","f_i","f_s","E"]);
-        else
-           respuesta=sprintf('Fracasó en %f iteraciones',niter)
+    % Convertir la función de entrada a un handle de función
+    f = str2func(['@(x)', func]);
 
-           T = table(niter, VariableNames=["iteraciones"]);
-        end
-    else %no certeza de raíz
-        xm(c+1)=xi(c+1);
-        fm(c+1)=fi(c+1);
-        E(c+1)=100;
-        respuesta=sprintf('El intervalo es inadecuado')         
-        T = table(-1, VariableNames=["intervalo"]);
+    % Inicializar valores
+    c = 1;
+    xi(c) = x0;
+    xs(c) = x1;
+    fi(c) = f(xi(c));
+    fs(c) = f(xs(c));
+
+    % Verificar raíces inmediatas
+    if fi(c) == 0
+        xm(c) = xi(c);
+        fm(c) = f(xm(c));
+        E(c) = 0;
+        respuesta = sprintf('El límite inferior %f es raíz de f(x)', xi(c));
+        return;
+    elseif fs(c) == 0
+        xm(c) = xs(c);
+        fm(c) = f(xm(c));
+        E(c) = 0;
+        respuesta = sprintf('El límite superior %f es raíz de f(x)', xs(c));
+        return;
+    elseif fi(c) * fs(c) > 0
+        respuesta = 'El intervalo proporcionado no es adecuado.';
+        return;
     end
 
+    % Iteración inicial
+    xm(c) = xi(c) - (fi(c) * (xs(c) - xi(c))) / (fs(c) - fi(c));
+    fm(c) = f(xm(c));
+    E(c) = Tol + 1;
+
+    % Iterar hasta que se cumpla la tolerancia o el número de iteraciones
+    while E(c) > Tol && c < niter
+        % Calcular nuevo intervalo
+        if fm(c) == 0
+            break; % Se encontró la raíz exacta
+        elseif fm(c) * fi(c) < 0
+            xs(c + 1) = xm(c);
+            fs(c + 1) = fm(c);
+            xi(c + 1) = xi(c);
+            fi(c + 1) = fi(c);
+        else
+            xi(c + 1) = xm(c);
+            fi(c + 1) = fm(c);
+            xs(c + 1) = xs(c);
+            fs(c + 1) = fs(c);
+        end
+
+        % Calcular nuevo xm y error
+        xm(c + 1) = xi(c + 1) - (fi(c + 1) * (xs(c + 1) - xi(c + 1))) / (fs(c + 1) - fi(c + 1));
+        fm(c + 1) = f(xm(c + 1));
+        if strcmp(Terror, 'Decimales Correctos')
+            E(c + 1) = abs(xm(c + 1) - xm(c));
+        else
+            E(c + 1) = abs((xm(c + 1) - xm(c)) / xm(c + 1));
+        end
+
+        c = c + 1;
+    end
+
+    % Verificar resultado final
+    if fm(c) == 0
+        respuesta = sprintf('%f es raíz exacta de f(x) en %d iteraciones', xm(c), c);
+        E(c) = 0;
+    elseif E(c) < Tol
+        respuesta = sprintf('%f es una aproximación con tolerancia = %f en %d iteraciones', xm(c), Tol, c);
+    else
+        respuesta = sprintf('Fracasó en %d iteraciones', niter);
+    end
+
+    % Crear tabla de resultados
+    T = table((1:c)', xm', xi', xs', fm', fi', fs', E', ...
+        'VariableNames', ["n", "x_m", "x_i", "x_s", "f_m", "f_i", "f_s", "E"]);
+
+    % Guardar tabla como CSV
     currentDir = fileparts(mfilename('fullpath'));
-
     tablesDir = fullfile(currentDir, '..', 'app', 'tables');
-    mkdir(tablesDir);
-    cd(tablesDir);
-    csv_file_path = fullfile(tablesDir, 'tabla_reglaFalsa.csv');
-    writetable(T, csv_file_path)
+    if ~exist(tablesDir, 'dir')
+        mkdir(tablesDir);
+    end
+    csvFilePath = fullfile(tablesDir, 'tabla_reglaFalsa.csv');
+    writetable(T, csvFilePath);
 
+    % Graficar resultados
     fig = figure('Visible', 'off');
-    xplot=((xm(c+1)-2):0.1:(xm(c+1)+2));
-    hold on
-    yline(0);
-    plot(xplot,eval(subs(f,xplot)));
+    xplot = linspace(min([xi, xs]) - 1, max([xi, xs]) + 1, 1000);
+    plot(xplot, arrayfun(f, xplot), 'b', 'LineWidth', 1.5);
+    hold on;
+    scatter(xm, arrayfun(f, xm), 'ro');
+    yline(0, '--k');
+    title('Convergencia de la Regla Falsa');
+    xlabel('x');
+    ylabel('f(x)');
+    grid on;
 
-    img = getframe(gcf);
+    % Guardar la gráfica
     staticDir = fullfile(currentDir, '..', 'app', 'static');
-    mkdir(staticDir);
+    if ~exist(staticDir, 'dir')
+        mkdir(staticDir);
+    end
     imgPath = fullfile(staticDir, 'grafica_reglaFalsa.png');
-    imwrite(img.cdata, imgPath);
-    hold off
+    saveas(fig, imgPath);
     close(fig);
 end
