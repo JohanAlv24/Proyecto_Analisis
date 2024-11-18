@@ -1,5 +1,4 @@
 function [respuesta] = ReglaFalsa(func, x0, x1, Tol, niter, Terror)
-
     % Convertir la función de entrada a un handle de función
     f = str2func(['@(x)', func]);
 
@@ -92,17 +91,19 @@ function [respuesta] = ReglaFalsa(func, x0, x1, Tol, niter, Terror)
     hold on;
     scatter(xm, arrayfun(f, xm), 'ro');
     yline(0, '--k');
-    title('Convergencia de la Regla Falsa');
+    title(['f(x) = ', func]); % Título dinámico
     xlabel('x');
     ylabel('f(x)');
     grid on;
 
-    % Guardar la gráfica
+    % Guardar la gráfica con un nombre dinámico basado en la función
+    safe_func = regexprep(func, '[^a-zA-Z0-9]', '_');
     staticDir = fullfile(currentDir, '..', 'app', 'static');
     if ~exist(staticDir, 'dir')
         mkdir(staticDir);
     end
-    imgPath = fullfile(staticDir, 'grafica_reglaFalsa.png');
-    saveas(fig, imgPath);
+    svgPath = fullfile(staticDir, [safe_func, '.svg']);
+    saveas(fig, svgPath, 'svg');
+    disp(['Gráfica SVG generada en: ', svgPath]);
     close(fig);
 end

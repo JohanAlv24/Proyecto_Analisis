@@ -34,19 +34,18 @@ def punto_fijo():
         tol = float(request.form['tol'].replace(',', '.'))
         niter = int(request.form['niter'])
         tipe = str(request.form['tipe'])
-        
+
         [r, N, xn, fm, E] = eng.pf(f, g, x, tol, niter, tipe, nargout=5)
         N, xn, fm, E = list(N[0]), list(xn[0]), list(fm[0]), list(E[0])
         length = len(N)
-        
+
         df = pd.read_csv(os.path.join(dir_tables, 'tabla_pf.csv'))
         df = df.astype(str)
         data = df.to_dict(orient='records')
         df.to_excel(os.path.join(dir_tables, 'tabla_pf.xlsx'), index=False)
-        
+
         imagen_path = os.path.join('static', 'grafica_pf.png')
-        return render_template('Seccion_1/resultado_pf.html', r=r, N=N, xn=xn, fm=fm, E=E, length=length, data=data, imagen_path=imagen_path)
-    
+        return render_template('Seccion_1/resultado_pf.html', r=r, N=N, xn=xn, fm=fm, E=E, length=length, data=data, imagen_path=imagen_path, f=f)
     return render_template('Seccion_1/formulario_pf.html')
 
 @blueprint.route('/pf/descargar', methods=['POST'])
@@ -99,7 +98,7 @@ def biseccion():
                 'Seccion_1/resultado_biseccion.html',
                 r=r, N=N, xn=xn, fm=fm, E=E,
                 length=length, data=data,
-                imagen_path=imagen_path
+                imagen_path=imagen_path, f=f
             )
 
         except Exception as e:
@@ -130,10 +129,9 @@ def multiple_roots():
         et = str(request.form['et'])
 
         eng.addpath(dir_matlab)
-        # Asume que multiple_roots retorna los valores necesarios o guarda los resultados en un archivo CSV
-        [xi, errores, resultado] = eng.raices_multiples(fn, xi, tol, k, et, nargout=3)  # Ejecuta el cálculo en MATLAB
+        [xi, errores, resultado] = eng.raices_multiples(fn, xi, tol, k, et, nargout=3)
         
-        # Lee los resultados de un archivo CSV
+        # Leer resultados del archivo CSV
         df = pd.read_csv(os.path.join(dir_tables, 'multiple_roots_results.csv'))
         df = df.astype(str)
         data = df.to_dict(orient='records')
@@ -141,9 +139,9 @@ def multiple_roots():
 
         imagen_path = os.path.join('static', 'grafica_multiple_roots.png')
 
-        return render_template('Seccion_1/resultado_raicesm.html', data=data, imagen_path=imagen_path, resultado=resultado)
-    
+        return render_template('Seccion_1/resultado_raicesm.html', data=data, imagen_path=imagen_path, resultado=resultado, fn=fn)
     return render_template('Seccion_1/formulario_raicesm.html')
+
 
 @blueprint.route('/rm/descargar', methods=['POST'])
 def descargar_archivo_raicesm():
@@ -155,30 +153,47 @@ def descargar_archivo_raicesm():
 @blueprint.route('/secante', methods=['GET', 'POST'])
 def secante():
     if request.method == 'POST':
-        f= str(request.form['f']) 
+        f = str(request.form['f']) 
         x0 = float(request.form['x0'].replace(',', '.'))
         x1 = float(request.form['x1'].replace(',', '.'))  
         tol = float(request.form['tol'].replace(',', '.'))
         Terror = str(request.form['Terror'])
         niter = int(request.form['niter'])
         
+        # Agregar directorio MATLAB
         eng.addpath(dir_matlab)
 
+        # Llamar a la función de MATLAB
         respuesta = eng.secante(f, x0, x1, tol, niter, Terror)
-        df = pd.read_csv(os.path.join(dir_tables,'tabla_secante.csv'))
-        df = df.astype(str)
+
+        # Leer el archivo CSV exportado
+        csv_path = os.path.join(dir_tables, 'tabla_secante.csv')
+        df = pd.read_csv(csv_path)
+        
+        # Depuración: verificar las columnas
+        print(df.head())  # Esto imprimirá las primeras filas en la consola
+        
+        # Convertir a lista de diccionarios
         data = df.to_dict(orient='records')
 
-        # Lee el archivo CSV
-        df = pd.read_csv(os.path.join(dir_tables,'tabla_secante.csv'))
-        # Escribe los datos en un nuevo archivo Excel
-        df.to_excel(os.path.join(dir_tables,'tabla_secante.xlsx'), index=False) 
+        # Guardar el archivo Excel (opcional)
+        excel_path = os.path.join(dir_tables, 'tabla_secante.xlsx')
+        df.to_excel(excel_path, index=False) 
 
-        #Gráfica
-        imagen_path = os.path.join('static','grafica_secante.png')  # Ruta de la imagen
-        return render_template('Seccion_1/resultado_secante.html',respuesta=respuesta, data=data,imagen_path=imagen_path)
+        print(df.columns)
+
+        # Ruta de la gráfica
+        imagen_path = os.path.join('static', 'grafica_secante.png')
+        return render_template(
+            'Seccion_1/resultado_secante.html',
+            respuesta=respuesta,
+            data=data,
+            imagen_path=imagen_path,
+            f=f
+        )
         
     return render_template('Seccion_1/formulario_secante.html')
+
 
 @blueprint.route('/secante/descargar', methods=['POST'])
 def descargar_archivo():
@@ -215,7 +230,7 @@ def reglaFalsa():
 
         #Gráfica
         imagen_path = os.path.join('static','grafica_reglaFalsa.png')  # Ruta de la imagen
-        return render_template('Seccion_1/resultado_reglaFalsa.html',respuesta=respuesta, data=data,imagen_path=imagen_path)
+        return render_template('Seccion_1/resultado_reglaFalsa.html',respuesta=respuesta, data=data,imagen_path=imagen_path, f=f)
         
     return render_template('Seccion_1/formulario_reglaFalsa.html')
 
@@ -231,55 +246,39 @@ def descargar_archivorf():
 @blueprint.route('/newton', methods=['GET', 'POST'])
 def newton():
     if request.method == 'POST':
+        f = str(request.form['f']) 
+        x = float(request.form['x'].replace(',', '.'))
+        tol = float(request.form['tol'].replace(',', '.'))
+        niter = int(request.form['niter'])
+        et = str(request.form['et'])
+
         try:
-            # Inicializar el motor de MATLAB
-            eng = matlab.engine.start_matlab()
-            
-            # Verificar que el directorio de MATLAB existe
-            if not os.path.exists(dir_matlab):
-                raise Exception(f"El directorio de MATLAB no existe: {dir_matlab}")
-            
-            # Agregar el path y verificar
-            eng.addpath(dir_matlab)
-            
-            # Obtener los datos del formulario
-            f = str(request.form['f']) 
-            x = float(request.form['x'].replace(',', '.'))  
-            tol = float(request.form['tol'].replace(',', '.'))
-            niter = int(request.form['niter'])
-            et = str(request.form['et'])
+            [r, N, xn, fm, dfm, E, c] = eng.newton(f, x, tol, niter, et, nargout=7)
 
-            # Llamar a la función de MATLAB
-            try:
-                [r, N, xn, fm, dfm, E, c] = eng.newton(f, x, tol, niter, et, nargout=7)
-            except Exception as e:
-                eng.quit()
-                return f"Error en MATLAB: {str(e)}", 400
-
-            # Procesar resultados
-            N, xn, fm, dfm, E = list(N[0]), list(xn[0]), list(fm[0]), list(dfm[0]), list(E[0])
-            length = len(N)
-
-            # Leer y procesar el CSV
-            df = pd.read_csv(os.path.join(dir_tables, 'tabla_newton.csv'))
-            df = df.astype(str)
+            # Leer archivo CSV
+            csv_path = os.path.join(dir_tables, 'tabla_newton.csv')
+            df = pd.read_csv(csv_path)
             data = df.to_dict(orient='records')
-            df.to_excel(os.path.join(dir_tables, 'tabla_newton.xlsx'), index=False)
 
-            eng.quit()  # Cerrar el motor de MATLAB
+            # Guardar archivo Excel (opcional)
+            excel_path = os.path.join(dir_tables, 'tabla_newton.xlsx')
+            df.to_excel(excel_path, index=False)
+
+            # Generar URL de la gráfica
+            safe_f_str = ''.join(c if c.isalnum() else '_' for c in f)
+            imagen_path = url_for('static', filename=f'{safe_f_str}.svg')
 
             return render_template(
                 'Seccion_1/resultado_newton.html',
-                r=r, N=N, xn=xn, fm=fm, dfm=dfm, E=E,
-                length=length, data=data,
-                imagen_path='../static/grafica_newton.png',
-                c=c, niter=niter
+                r=r, f=f, data=data,
+                imagen_path=imagen_path
             )
-            
         except Exception as e:
             return f"Error: {str(e)}", 400
             
     return render_template('Seccion_1/formulario_newton.html')
+
+
 
 @blueprint.route('/newton/descargar', methods=['POST'])
 def descargar_archivo_newton():
@@ -288,3 +287,116 @@ def descargar_archivo_newton():
 
     # Enviar el archivo al cliente para descargar
     return send_file(archivo_path, as_attachment=True)
+
+@blueprint.route('/biseccion/descargar_grafica_svg', methods=['POST'])
+def descargar_grafica_biseccion_svg():
+    # Obtener el nombre de la función desde el formulario
+    f_str = request.form.get('f_str')
+    print(f"Nombre de la función recibido: {f_str}")  # Para depuración
+
+    if not f_str:
+        return "Nombre de la función no proporcionado", 400
+
+    # Generar un nombre seguro para el archivo
+    safe_f_str = ''.join(c if c.isalnum() else '_' for c in f_str)
+    archivo_path = os.path.join(dir_actual, 'static', f'{safe_f_str}.svg')
+
+    # Verificar si el archivo existe y enviarlo
+    if os.path.exists(archivo_path):
+        return send_file(archivo_path, as_attachment=True, download_name=f'{safe_f_str}.svg')
+    else:
+        return "Gráfica SVG no encontrada", 404
+
+
+
+@blueprint.route('/pf/descargar_grafica', methods=['POST'])
+def descargar_grafica_pf():
+    # Obtener el nombre de la función desde el formulario
+    f_str = request.form.get('f_str')
+    print(f"Nombre de la función recibido: {f_str}")  # Depuración
+
+    if not f_str:
+        return "Nombre de la función no proporcionado", 400
+
+    # Generar el nombre seguro para el archivo
+    safe_f_str = ''.join(c if c.isalnum() else '_' for c in f_str)
+    archivo_path = os.path.join(dir_actual, 'static', f'grafica_{safe_f_str}.svg')
+
+    # Verificar si el archivo existe y enviarlo
+    if os.path.exists(archivo_path):
+        return send_file(archivo_path, as_attachment=True, download_name=f'grafica_{safe_f_str}.svg')
+    else:
+        return "Gráfica SVG no encontrada", 404
+
+
+@blueprint.route('/rm/descargar_grafica', methods=['POST'])
+def descargar_grafica_raicesm():
+    # Obtener el nombre de la función desde el formulario
+    fn_str = request.form.get('fn')
+    print(f"Nombre de la función recibido: {fn_str}")  # Para depuración
+
+    if not fn_str:
+        return "Nombre de la función no proporcionado", 400
+
+    # Generar un nombre seguro para el archivo
+    safe_fn_str = ''.join(c if c.isalnum() else '_' for c in fn_str)
+    archivo_path = os.path.join(dir_actual, 'static', f'{safe_fn_str}.svg')
+
+    # Verificar si el archivo existe y enviarlo
+    if os.path.exists(archivo_path):
+        return send_file(archivo_path, as_attachment=True, download_name=f'{safe_fn_str}.svg')
+    else:
+        return "Gráfica SVG no encontrada", 404
+    
+
+@blueprint.route('/rf/descargar_grafica', methods=['POST'])
+def descargar_grafica_regla_falsa():
+    # Obtener el nombre de la función desde el formulario
+    f_str = request.form.get('f')
+    if not f_str:
+        return "Nombre de la función no proporcionado", 400
+
+    # Generar un nombre seguro para el archivo
+    safe_f_str = ''.join(c if c.isalnum() else '_' for c in f_str)
+    archivo_path = os.path.join(dir_actual, 'static', f'{safe_f_str}.svg')
+
+    # Verificar si el archivo existe y enviarlo
+    if os.path.exists(archivo_path):
+        return send_file(archivo_path, as_attachment=True, download_name=f'{safe_f_str}.svg')
+    else:
+        return "Gráfica SVG no encontrada", 404
+
+@blueprint.route('/secante/descargar_grafica', methods=['POST'])
+def descargar_grafica_secante():
+    # Obtener el nombre de la función desde el formulario
+    func_str = request.form.get('f')
+    if not func_str:
+        return "Nombre de la función no proporcionado", 400
+
+    # Generar un nombre seguro para el archivo
+    safe_func_str = ''.join(c if c.isalnum() else '_' for c in func_str)
+    archivo_path = os.path.join(dir_actual, 'static', f'{safe_func_str}.svg')
+
+    # Verificar si el archivo existe y enviarlo
+    if os.path.exists(archivo_path):
+        return send_file(archivo_path, as_attachment=True, download_name=f'{safe_func_str}.svg')
+    else:
+        return "Gráfica SVG no encontrada", 404
+
+
+@blueprint.route('/newton/descargar_grafica', methods=['POST'])
+def descargar_grafica_newton():
+    # Obtener el nombre de la función desde el formulario
+    f_str = request.form.get('f')
+    if not f_str:
+        return "Nombre de la función no proporcionado", 400
+
+    # Generar un nombre seguro para el archivo
+    safe_f_str = ''.join(c if c.isalnum() else '_' for c in f_str)
+    archivo_path = os.path.join(dir_actual, 'static', f'{safe_f_str}.svg')
+
+    # Verificar si el archivo existe y enviarlo
+    if os.path.exists(archivo_path):
+        return send_file(archivo_path, as_attachment=True, download_name=f'{safe_f_str}.svg')
+    else:
+        return "Gráfica SVG no encontrada", 404
