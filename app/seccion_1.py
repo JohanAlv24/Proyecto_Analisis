@@ -1,17 +1,26 @@
-from flask import Blueprint, render_template, request, send_file
+from flask import Blueprint, render_template, request, send_file, url_for
 import os, json, csv
 import matlab.engine
 import pandas as pd
 import numpy as np
 
+# Crear el blueprint
 blueprint = Blueprint('seccion_1', __name__)
 
+# Iniciar el motor de MATLAB
 eng = matlab.engine.start_matlab()
 
-separador = os.path.sep 
+# Rutas base
 dir_actual = os.path.dirname(os.path.abspath(__file__))
-dir_matlab = separador.join(dir_actual.split(separador)[:-1])+'\matlab'
+dir_matlab = os.path.join(os.path.dirname(dir_actual), 'matlab')
 dir_tables = os.path.join(dir_actual, 'tables')
+
+# Añadir el directorio MATLAB al path
+if os.path.exists(dir_matlab):
+    eng.addpath(dir_matlab)
+    print(f"Ruta añadida correctamente: {dir_matlab}")
+else:
+    print(f"La ruta de MATLAB no existe: {dir_matlab}")
 
 eng.addpath(dir_matlab)
 
@@ -45,51 +54,69 @@ def descargar_archivo_pf():
     archivo_path = os.path.join(dir_tables, 'tabla_pf.xlsx')
     return send_file(archivo_path, as_attachment=True)
 
-
-# Método de Bisección
+# Ruta para el método de bisección
 @blueprint.route('/biseccion', methods=['GET', 'POST'])
 def biseccion():
     if request.method == 'POST':
+        # Obtener datos del formulario
         f = str(request.form['f'])
         xi = float(request.form['xi'].replace(',', '.'))
         xs = float(request.form['xs'].replace(',', '.'))
         tol = float(request.form['tol'].replace(',', '.'))
         niter = int(request.form['niter'])
         tipe = str(request.form['tipe'])
-        
-        # Iniciar el motor de MATLAB y agregar el directorio al path
-        eng = matlab.engine.start_matlab()
-        matlab_path = r'C:C:\Users\piper\Downloads\SolveIT-main\matlab\biseccion.m'  # Asegúrate de cambiar esto a tu ruta real
-        eng.addpath(matlab_path)
-        
-        # Llamar a la función 'biseccion' y manejar la salida
+
         try:
+            # Ejecutar la función de MATLAB
             [r, N, xn, fm, E] = eng.biseccion(f, xi, xs, tol, niter, tipe, nargout=5)
-            if isinstance(N, float) or isinstance(xn, float) or isinstance(fm, float) or isinstance(E, float):
-                N, xn, fm, E = [N], [xn], [fm], [E]
+
+            # Convertir resultados en listas
             if len(N) != 0:
                 N, xn, fm, E = list(N[0]), list(xn[0]), list(fm[0]), list(E[0])
+            else:
+                N, xn, fm, E = [], [], [], []
+
             length = len(N)
-            
-            df = pd.read_csv(os.path.join(dir_tables, 'tabla_biseccion.csv'))
-            df = df.astype(str)
-            data = df.to_dict(orient='records')
-            df.to_excel(os.path.join(dir_tables, 'tabla_biseccion.xlsx'), index=False)
-            
-            imagen_path = os.path.join('static', 'grafica_biseccion.png')
-            return render_template('Seccion_1/resultado_biseccion.html', r=r, N=N, xn=xn, fm=fm, E=E, length=length, data=data, imagen_path=imagen_path)
+
+            # Leer y procesar la tabla de resultados
+            tabla_path = os.path.join(dir_tables, 'tabla_biseccion.csv')
+            if os.path.exists(tabla_path):
+                df = pd.read_csv(tabla_path)
+                df = df.astype(str)
+                data = df.to_dict(orient='records')
+            else:
+                data = []
+
+            # Procesar la ruta de la gráfica
+            imagen_path = os.path.join(dir_actual, 'static', 'grafica_biseccion.png')
+            if not os.path.exists(imagen_path):
+                imagen_path = None
+            else:
+                imagen_path = url_for('static', filename='grafica_biseccion.png')
+
+            # Renderizar resultados
+            return render_template(
+                'Seccion_1/resultado_biseccion.html',
+                r=r, N=N, xn=xn, fm=fm, E=E,
+                length=length, data=data,
+                imagen_path=imagen_path
+            )
+
         except Exception as e:
-            print(e)
-            return f"Error en la ejecución de MATLAB: {str(e)}"
+            print(f"Error en MATLAB: {e}")
+            return f"Error en la ejecución de MATLAB: {e}"
+
+    # Renderizar formulario
     return render_template('Seccion_1/formulario_biseccion.html')
 
-
-
-
+# Ruta para descargar el archivo de resultados
 @blueprint.route('/biseccion/descargar', methods=['POST'])
 def descargar_archivo_biseccion():
     archivo_path = os.path.join(dir_tables, 'tabla_biseccion.xlsx')
-    return send_file(archivo_path, as_attachment=True)
+    if os.path.exists(archivo_path):
+        return send_file(archivo_path, as_attachment=True)
+    else:
+        return "Archivo no encontrado", 404
 
 
 #Método de raíces múltiples

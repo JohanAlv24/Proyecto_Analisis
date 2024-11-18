@@ -1,24 +1,40 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resultado del Método de Bisección</title>
+    <title>Resultado</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/resultado_1.css') }}">
 </head>
 {% extends "base.html" %}
-<body>
-    {% block content %}
-    <h1>Resultado del Método de Bisección</h1>
-    <p>{{ r }}</p>
-    <div class="table-container">
-        <table>
-            <thead>
+
+{% block title %}
+Resultados Bisección
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-4">Resultados del Método de Bisección</h1>
+
+    <!-- Resultados principales -->
+    <div class="card mt-3">
+        <div class="card-body">
+            <h4 class="card-title">Resultados principales</h4>
+            <p><strong>Raíz aproximada:</strong> {{ r }}</p>
+            <p><strong>Iteraciones realizadas:</strong> {{ length }}</p>
+        </div>
+    </div>
+
+    <!-- Tabla de resultados -->
+    <div class="mt-4">
+        <h2>Detalles de las iteraciones</h2>
+        <table class="table table-striped table-bordered">
+            <thead class="thead-dark">
                 <tr>
-                    <th>N</th>
-                    <th>xn</th>
-                    <th>fm</th>
-                    <th>E</th>
+                    <th>Iteración</th>
+                    <th>x_n</th>
+                    <th>f(x_n)</th>
+                    <th>Error</th>
                 </tr>
             </thead>
             <tbody>
@@ -33,7 +49,20 @@
             </tbody>
         </table>
     </div>
-    <form action="biseccion/descargar" method="post">
-        <button type="submit">Descargar</button>
-    </form>
-    <div class="image-container
+
+    <!-- Gráfica -->
+    <div class="mt-4">
+        <h2>Gráfica</h2>
+        {% if imagen_path %}
+        <img src="{{ imagen_path }}" alt="Gráfica de Bisección" class="img-fluid">
+        {% else %}
+        <p class="text-warning">No se pudo generar la gráfica.</p>
+        {% endif %}
+    </div>
+
+    <br>
+      <form action="biseccion/descargar" method="post">
+          <button type="submit">Descargar</button>
+      </form>
+</div>
+{% endblock %}
