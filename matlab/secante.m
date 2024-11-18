@@ -1,5 +1,4 @@
 function [respuesta, N, XN, fm, E] = secante(func, x0, x1, Tol, niter, Terror)
-
     % Convertir la función de entrada a un handle de función
     f = str2func(['@(x)', func]);
     c = 0;
@@ -86,18 +85,20 @@ function [respuesta, N, XN, fm, E] = secante(func, x0, x1, Tol, niter, Terror)
     hold on;
     scatter(XN, arrayfun(f, XN), 'ro');
     yline(0, '--k');
-    title('Convergencia del Método de la Secante');
+    title(['f(x) = ', func]); % Título dinámico
     xlabel('x');
     ylabel('f(x)');
     grid on;
 
-    % Guardar gráfica como imagen
+    % Generar nombre seguro para el archivo basado en la función
+    safe_func_name = regexprep(func, '[^a-zA-Z0-9]', '_');
+
+    % Guardar como SVG
     staticDir = fullfile(currentDir, '..', 'app', 'static');
     if ~exist(staticDir, 'dir')
         mkdir(staticDir);
     end
-    imgPath = fullfile(staticDir, 'grafica_secante.png');
-    saveas(fig, imgPath);
+    svgPath = fullfile(staticDir, [safe_func_name, '.svg']);
+    saveas(fig, svgPath, 'svg');
     close(fig);
-
 end

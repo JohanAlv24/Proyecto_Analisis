@@ -73,3 +73,15 @@ button:hover {
     height: auto;
     border-radius: 8px;
 }
+
+.container {
+    max-width: 1200px; /* Ancho máximo fijo */
+    margin: auto; /* Centrar el contenedor */
+}
+.table th, .table td {
+    white-space: nowrap; /* Evitar quiebres de texto en las celdas */
+    text-align: center; /* Centrar contenido */
+}
+.table-responsive {
+    overflow-x: auto; /* Permitir desplazamiento horizontal */
+}

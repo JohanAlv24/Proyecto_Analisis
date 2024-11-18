@@ -90,7 +90,7 @@ function [r, N, xn, fm, E] = biseccion(f_str, xi, xs, Tol, niter, tipe)
         warning('No se pudo generar la tabla de resultados porque N_list está vacío.');
     end
 
-    % Crear y guardar la gráfica de resultados solo si xn no está vacío
+        % Crear y guardar la gráfica de resultados solo si xn no está vacío
     if isempty(xn)
         warning('La lista xn está vacía. No se puede generar la gráfica.');
     else
@@ -102,16 +102,23 @@ function [r, N, xn, fm, E] = biseccion(f_str, xi, xs, Tol, niter, tipe)
         scatter(xn, f(xn), 'r', 'filled'); % Puntos intermedios
         scatter(xn(end), f(xn(end)), 'g', 'filled', 'DisplayName', 'Raíz aproximada'); % Raíz aproximada
         legend('Función', 'Iteraciones', 'Raíz aproximada');
-        hold off;
+        title(['f(x) = ', f_str]); % Título dinámico con la función
+        xlabel('x');
+        ylabel('f(x)');
+        grid on;
 
-        % Guardar la gráfica en la carpeta "static"
+        % Generar un nombre seguro para el archivo basado en la función
+        safe_f_str = regexprep(f_str, '[^a-zA-Z0-9]', '_');
+
+        % Guardar en formato SVG
         staticDir = fullfile(currentDir, '..', 'app', 'static'); % Ruta a la carpeta "static"
-        if ~exist(staticDir, 'dir') % Si la carpeta no existe, crearla
+        if ~exist(staticDir, 'dir')
             mkdir(staticDir);
         end
-        imgPath = fullfile(staticDir, 'grafica_biseccion.png');
-        saveas(fig, imgPath);
-        disp(['Gráfica generada en: ', imgPath]);
+        svgPath = fullfile(staticDir, [ safe_f_str, '.svg']);
+        saveas(fig, svgPath, 'svg');
+
+        disp(['Gráfica SVG generada en: ', svgPath]);
         close(fig);
     end
 end

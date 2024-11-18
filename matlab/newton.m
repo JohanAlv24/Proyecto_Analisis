@@ -24,9 +24,14 @@ function [r, N, xn, fm, dfm, E, c] = newton(f_str, x0, Tol, niter, et)
         fe = fm(c+2);
         dfm(c+2) = df(xn(c+2));
         dfe = dfm(c+2);
+
+        % Validar derivada
+        if dfe == 0
+            error('La derivada se anuló, posible raíz múltiple o estancamiento.');
+        end
         
         if strcmp(et, 'Error Absoluto')
-            E(c+2) = abs(xn(c+2)-x0);
+            E(c+2) = abs(xn(c+2) - x0);
         else
             E(c+2) = abs(xn(c+2) - x0) / abs(xn(c+2));
         end
@@ -39,50 +44,70 @@ function [r, N, xn, fm, dfm, E, c] = newton(f_str, x0, Tol, niter, et)
     
     % Mensajes de resultado
     if fe == 0
-       r = sprintf('%f es raiz de f(x) \n', x0);
+       r = sprintf('%f es raíz de f(x)', x0);
     elseif error < Tol
-       r = sprintf('%f es una aproximación de una raiz de f(x) con una tolerancia= %f \n', x0, Tol);
-    elseif dfe == 0
-       r = sprintf('%f es una posible raiz múltiple de f(x) \n', x0);
+       r = sprintf('%f es una aproximación de una raíz de f(x) con una tolerancia = %f', x0, Tol);
     else 
-       r = sprintf('Fracasó en %f iteraciones \n', niter);
+       r = sprintf('Fracasó en %f iteraciones', niter);
     end
 
-    % Crear gráfica
+    % Ajustar vectores a la misma longitud
+    max_length = min([length(N), length(xn), length(fm), length(dfm), length(E)]);
+    N = N(1:max_length);
+    xn = xn(1:max_length);
+    fm = fm(1:max_length);
+    dfm = dfm(1:max_length);
+    E = E(1:max_length);
+
+    % Crear y guardar tabla CSV
+    T = table(N', xn', fm', dfm', E', 'VariableNames', {'Iteration', 'xn', 'fxn', 'dfxn', 'Error'});
+
     currentDir = fileparts(mfilename('fullpath'));
-    
-    % Crear directorio para tablas si no existe
     tablesDir = fullfile(currentDir, '..', 'app', 'tables');
     if ~exist(tablesDir, 'dir')
         mkdir(tablesDir);
     end
-    
-    % Guardar tabla CSV
     csv_file_path = fullfile(tablesDir, 'tabla_newton.csv');
-    T = table(N', xn', fm', E', 'VariableNames', {'Iteration', 'xn', 'fxn', 'E'});
     writetable(T, csv_file_path);
 
     % Crear gráfica
+    disp('Iniciando generación de gráfica...');
     fig = figure('Visible', 'off');
-    x_plot = linspace(min(xn)-2, max(xn)+2, 100);
-    y_plot = zeros(size(x_plot));
-    for i = 1:length(x_plot)
-        y_plot(i) = f(x_plot(i));
+
+    x_min = min(xn) - 2;
+    x_max = max(xn) + 2;
+
+    % Validar si x_min y x_max son iguales
+    if x_min == x_max
+        x_min = x_min - 1;
+        x_max = x_max + 1;
     end
-    
-    hold on
-    yline(0);
-    plot(x_plot, y_plot);
-    
-    % Guardar gráfica
+
+    disp(['Rango de x: ', num2str(x_min), ' a ', num2str(x_max)]);
+
+    x_plot = linspace(x_min, x_max, 100);
+    y_plot = arrayfun(f, x_plot);
+
+    hold on;
+    yline(0, '--k'); % Línea horizontal en y = 0
+    plot(x_plot, y_plot, 'b', 'LineWidth', 1.5); % Curva de la función
+    scatter(xn, arrayfun(f, xn), 'ro'); % Puntos de las iteraciones
+    title(['f(x) = ' f_str]); % Título dinámico con la función
+    xlabel('x');
+    ylabel('f(x)');
+    grid on;
+
+    % Guardar gráfica como SVG
     staticDir = fullfile(currentDir, '..', 'app', 'static');
     if ~exist(staticDir, 'dir')
         mkdir(staticDir);
     end
-    img = getframe(gcf);
-    imgPath = fullfile(staticDir, 'grafica_newton.png');
-    imwrite(img.cdata, imgPath);
 
-    hold off
-    close(fig);
+    % Generar nombre seguro para el archivo
+    safe_f_str = regexprep(f_str, '[^a-zA-Z0-9]', '_');
+    svgPath = fullfile(staticDir, [safe_f_str '.svg']);
+    disp(['Guardando gráfica como: ', svgPath]);
+    saveas(fig, svgPath, 'svg'); % Guardar como SVG
+    close(fig); % Cerrar la figura
+
 end

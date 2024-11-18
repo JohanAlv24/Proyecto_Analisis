@@ -56,16 +56,19 @@ function [xi, errores, resultado] = multiple_roots(fn_str, xi, tol, k, et)
     end
 
     % Graficar resultados
-    fig = figure;
+    fig = figure('Visible', 'off');
     x_vals = linspace(min(xis) - 1, max(xis) + 1, 1000);
     y_vals = arrayfun(fn, x_vals);
     plot(x_vals, y_vals, 'b', 'LineWidth', 1.5);
     hold on;
     scatter(xis, arrayfun(fn, xis), 'ro');
-    title('Convergencia del Método de Raíces Múltiples');
+    title(['f(x) = ', fn_str]); % Título dinámico
     xlabel('x');
     ylabel('f(x)');
     grid on;
+
+    % Generar un nombre seguro para el archivo basado en la función
+    safe_fn_str = regexprep(fn_str, '[^a-zA-Z0-9]', '_');
 
     % Guardar la gráfica
     currentDir = fileparts(mfilename('fullpath'));
@@ -73,9 +76,14 @@ function [xi, errores, resultado] = multiple_roots(fn_str, xi, tol, k, et)
     if ~exist(staticDir, 'dir')
         mkdir(staticDir);
     end
-    imgPath = fullfile(staticDir, 'grafica_multiple_roots.png');
-    saveas(fig, imgPath);
+
+    % Guardar como SVG
+    svgPath = fullfile(staticDir, [safe_fn_str, '.svg']);
+    saveas(fig, svgPath, 'svg');
+    disp(['Gráfica SVG generada en: ', svgPath]);
+
     close(fig);
+
 
     % Guardar resultados en un archivo CSV
     T = table((1:length(xis))', xis', arrayfun(fn, xis)', errores', ...
