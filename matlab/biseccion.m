@@ -76,14 +76,18 @@ function [r, N, xn, fm, E] = biseccion(f_str, xi, xs, Tol, niter, tipe)
 
     % Guardar la tabla de resultados en un archivo CSV solo si el intervalo es adecuado
     if ~isempty(N_list)
-        currentDir = fileparts(mfilename('fullpath'));
-        tablesDir = fullfile(currentDir, '..', 'app', 'tables');
-        if ~exist(tablesDir, 'dir')
+        currentDir = fileparts(mfilename('fullpath')); % Directorio actual del script
+        tablesDir = fullfile(currentDir, '..', 'app', 'tables'); % Ruta a la carpeta "tables"
+        if ~exist(tablesDir, 'dir') % Si la carpeta no existe, crearla
             mkdir(tablesDir);
         end
+        % Generar la tabla y escribirla en un archivo CSV
         csv_file_path = fullfile(tablesDir, 'tabla_biseccion.csv');
         T = table(N', xn', fm', E', 'VariableNames', {'Iteration', 'xn', 'fxn', 'E'});
         writetable(T, csv_file_path);
+        disp(['Tabla de resultados generada en: ', csv_file_path]);
+    else
+        warning('No se pudo generar la tabla de resultados porque N_list está vacío.');
     end
 
     % Crear y guardar la gráfica de resultados solo si xn no está vacío
@@ -91,19 +95,23 @@ function [r, N, xn, fm, E] = biseccion(f_str, xi, xs, Tol, niter, tipe)
         warning('La lista xn está vacía. No se puede generar la gráfica.');
     else
         fig = figure('Visible', 'off');
-        xplot = linspace(min(xn) - 5, max(xn) + 5, 1000);
         hold on;
-        yline(0);
-        plot(xplot, f(xplot));
-        scatter(xn(end), f(xn(end)), 'r', 'filled');
-        img = getframe(gcf);
-        staticDir = fullfile(currentDir, '..', 'app', 'static');
-        if ~exist(staticDir, 'dir')
+        xplot = linspace(min(xn) - 0.5, max(xn) + 0.5, 1000); % Rango de la gráfica
+        yline(0, '--', 'Color', 'black'); % Línea del eje Y
+        plot(xplot, f(xplot), 'b', 'LineWidth', 1.5); % Gráfica de la función
+        scatter(xn, f(xn), 'r', 'filled'); % Puntos intermedios
+        scatter(xn(end), f(xn(end)), 'g', 'filled', 'DisplayName', 'Raíz aproximada'); % Raíz aproximada
+        legend('Función', 'Iteraciones', 'Raíz aproximada');
+        hold off;
+
+        % Guardar la gráfica en la carpeta "static"
+        staticDir = fullfile(currentDir, '..', 'app', 'static'); % Ruta a la carpeta "static"
+        if ~exist(staticDir, 'dir') % Si la carpeta no existe, crearla
             mkdir(staticDir);
         end
         imgPath = fullfile(staticDir, 'grafica_biseccion.png');
-        imwrite(img.cdata, imgPath);
-        hold off;
+        saveas(fig, imgPath);
+        disp(['Gráfica generada en: ', imgPath]);
         close(fig);
     end
 end
