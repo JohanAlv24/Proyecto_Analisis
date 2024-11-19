@@ -50,20 +50,21 @@
         <form action="jacobi/descargar" method="post">
             <button type="submit">Descargar</button>
         </form>
-    </div>
+        </div>
 
-    <div class="result-container">
-        <h1>Solución Sistema de Ecuaciones Ax=b</h1>
-        <div class="image-container">
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <img src="{{ imagen_path }}" alt="Imagen">
-                    <p>{{ Re }}</p>
+            {% if c < niter and A|length == 2 %}
+            <div class="result-container">
+                <div class="image-container">
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <img src="{{ imagen_path }}" alt="Imagen">
+                            <p>{{ Re }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-    {% endif %}
+            {% endif %}
+        {% endif %}
     {% endblock %}
 </body>
 </html>

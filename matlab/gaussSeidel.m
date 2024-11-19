@@ -1,4 +1,4 @@
-function [r, N, xn, E, re, c] = gaussSeidel(x0, A, b, et, Tol, niter)
+function [r, N, xn, E, re, c, A] = gaussSeidel(x0, A, b, et, Tol, niter)
     disp(x0)
     disp(A)
     disp(b)
@@ -38,64 +38,37 @@ function [r, N, xn, E, re, c] = gaussSeidel(x0, A, b, et, Tol, niter)
         r = sprintf('Fracasó en %f iteraciones\n', niter) 
     end
 
+    if size(A, 1) == 2 && size(A, 2) == 2
+        % Crear la figura para graficar las líneas del sistema
+        fig = figure('Visible', 'off');
+        hold on;
+        grid on;
+        xlabel('x');
+        ylabel('y');
+        title('Líneas del sistema de ecuaciones');
+            
+        % Definir el rango para x
+        x_range = linspace(-10, 10, 100);
+            
+        % Graficar cada ecuación del sistema
+        for i = 1:2
+        % Calcular y en función de x: A(i,1)*x + A(i,2)*y = b(i)
+        y_line = (b(i) - A(i, 1) * x_range) / A(i, 2);
+        plot(x_range, y_line, 'DisplayName', sprintf('Ecuación %d', i));
+            end
+            
+        legend('show');
+        hold off;   
 
-    T = table(N', xn', E', 'VariableNames', {'Iteration', 'xn', 'E'});
-    csv_file_path = "app/tables/tabla_gaussSeidel.csv";
-    writetable(T, csv_file_path)
-    
-
-    % Crear la figura para visualizar la matriz A, el vector solución x, y el vector b
-    [sizee, const]= calculate(length(b));
-    fig = figure('Visible','off');
-    set(fig, 'Color', 'white', 'Units', 'inches', 'Position', [0, 0, sizee, sizee/2]);
-    axis off;
-
-    % Crear una posición inicial
-    posY = 1;
-    posX = 0.01;
-    % Mostrar la matriz A
-    text(posX, posY, 'A', 'FontSize', 8, 'FontWeight', 'bold', 'Color', 'black');
-    posY = posY - 0.12;
-    for i = 1:size(A, 1)
-        formattedRow = arrayfun(@(num) sprintf('%.2f', num), A(i, :), 'UniformOutput', false);
-        rowText = strjoin(formattedRow, '    ');
-        text(posX, posY, rowText, 'FontSize', 8, 'Color', 'blue');
-        posY = posY - 0.12;
+        saveas(fig, 'app/static/grafica_ecuaciones_gs.png');
+        close(fig); 
+    else
+        % Si la matriz no es 2x2, no se genera la gráfica
+        fprintf('Advertencia: La matriz no es 2x2. No se generará una gráfica.\n');
     end
 
-    posX= posX+(const*length(b));
-    text(posX, 0.8, '*', 'FontSize', 15, 'FontWeight', 'bold', 'Color', 'black');
-
-    % Mostrar el vector solución x
-    posY = 1;
-    posX = posX+0.06;  % Ajustar la posición en X después de la matriz A
-    text(posX, posY, 'xn', 'FontSize', 8, 'FontWeight', 'bold', 'Color', 'black');
-    posY = posY - 0.12;
-    for i = 1:size(x1, 1)
-        xText = formatNumber(x1(i));
-        text(posX, posY, xText, 'FontSize', 8, 'Color', 'green');
-        posY = posY - 0.12;
-    end
-
-    posX= posX+(2.2*const);
-    text(posX, 0.8, '=', 'FontSize', 15, 'FontWeight', 'bold', 'Color', 'black');
-    % Mostrar el vector b
-    posY = 1;
-    posX = posX+(const/2);  % Ajustar la posición en X después del vector solución x
-    text(posX, posY, 'b', 'FontSize', 8, 'FontWeight', 'bold', 'Color', 'black');
-    posY = posY - 0.12;
-    for i = 1:size(b, 1)
-        bText = sprintf('%.2f', b(i));
-        text(posX, posY, bText, 'FontSize', 8, 'Color', 'red');
-        posY = posY - 0.12;
-    end
-
-    
-    % Guardar la figura como PNG
-    saveas(fig, 'app/static/grafica_gaussSeidel.png');
-    close(fig);
-   
 end
+
 
  % Función para formatear números
 function str = formatNumber(num)

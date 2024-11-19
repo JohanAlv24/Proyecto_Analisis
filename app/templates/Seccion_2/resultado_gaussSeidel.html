@@ -38,9 +38,8 @@
     </form>
     </div>
     
-    {% if c < niter %}
+    {% if c < niter and A|length == 2 %}
       <div class="result-container">
-        <h1>Solución Sistema de Ecuaciones Ax=b</h1>
         <div class="image-container">
           <div class="row mt-4">
             <div class="col-md 6">

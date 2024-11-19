@@ -1,4 +1,4 @@
-function [r, N, xi, E, Re] = jacobi(x0, A, b, Tol, niter, error_type)
+function [r, N, xi, E, Re, c, A] = jacobi(x0, A, b, Tol, niter, error_type)
     x0 = eval(x0);
     A = eval(A);
     b = eval(b);
@@ -28,7 +28,7 @@ function [r, N, xi, E, Re] = jacobi(x0, A, b, Tol, niter, error_type)
         end
 
         error = E(c + 1);
-        xi = [xi; x1']; % Agregar x1 como una nueva fila en la matriz xi
+        xi = [xi; x1]; % Agregar x1 como una nueva fila en la matriz xi
         N(c + 1) = c + 1;   % Agregar n a la lista N
         x0 = x1;
         c = c + 1;
@@ -37,81 +37,39 @@ function [r, N, xi, E, Re] = jacobi(x0, A, b, Tol, niter, error_type)
     if error < Tol
         r = sprintf('%s Es una aproximación de la solución del sistema con una tolerancia= %f\n', mat2str(x1), Tol);
     else 
-        r = sprintf('Fracasó en %f iteraciones\n', niter); 
+        r = sprintf('Fracasó en %f iteraciones\n', c); 
     end
 
-    % Guardar los resultados en un archivo CSV
-    xi_table = array2table(xi, 'VariableNames', arrayfun(@(i) sprintf('x%d', i), 1:size(xi, 2), 'UniformOutput', false));
-    T = table(N', E', 'VariableNames', {'Iteration', 'E'});
-    T = [T, xi_table];
-    
-    currentDir = fileparts(mfilename('fullpath'));
-    tablesDir = fullfile(currentDir, '..', 'app', 'tables');
-    if ~exist(tablesDir, 'dir')
-        mkdir(tablesDir);
-    end
-    csvFilePath = fullfile(tablesDir, 'tabla_jacobi.csv');
-    writetable(T, csvFilePath);
+   if size(A, 1) == 2 && size(A, 2) == 2
+        % Crear la figura para graficar las líneas del sistema
+        fig = figure('Visible', 'off');
+        hold on;
+        grid on;
+        xlabel('x');
+        ylabel('y');
+        title('Líneas del sistema de ecuaciones');
+            
+        % Definir el rango para x
+        x_range = linspace(-10, 10, 100);
+            
+        % Graficar cada ecuación del sistema
+        for i = 1:2
+        % Calcular y en función de x: A(i,1)*x + A(i,2)*y = b(i)
+        y_line = (b(i) - A(i, 1) * x_range) / A(i, 2);
+        plot(x_range, y_line, 'DisplayName', sprintf('Ecuación %d', i));
+            end
+            
+        legend('show');
+        hold off;   
 
-    % Crear la figura para visualizar la matriz A, el vector solución x, y el vector b
-    [sizee, const]= calculate(length(b));
-    fig = figure('Visible','off');
-    set(fig, 'Color', 'white', 'Units', 'inches', 'Position', [0, 0, sizee, sizee/2]);
-    axis off;
-
-    % Crear una posición inicial
-    posY = 1;
-    posX = 0.01;
-    % Mostrar la matriz A
-    text(posX, posY, 'A', 'FontSize', 8, 'FontWeight', 'bold', 'Color', 'black');
-    posY = posY - 0.12;
-    for i = 1:size(A, 1)
-        formattedRow = arrayfun(@(num) sprintf('%.2f', num), A(i, :), 'UniformOutput', false);
-        rowText = strjoin(formattedRow, '    ');
-        text(posX, posY, rowText, 'FontSize', 8, 'Color', 'blue');
-        posY = posY - 0.12;
+        saveas(fig, 'app/static/grafica_jacobi.png');
+        close(fig); 
+    else
+        % Si la matriz no es 2x2, no se genera la gráfica
+        fprintf('Advertencia: La matriz no es 2x2. No se generará una gráfica.\n');
     end
 
-    posX= posX+(const*length(b));
-    text(posX, 0.8, '*', 'FontSize', 15, 'FontWeight', 'bold', 'Color', 'black');
-
-    % Mostrar el vector solución x
-    posY = 1;
-    posX = posX+0.06;  % Ajustar la posición en X después de la matriz A
-    text(posX, posY, 'xn', 'FontSize', 8, 'FontWeight', 'bold', 'Color', 'black');
-    posY = posY - 0.12;
-    for i = 1:size(x1, 1)
-        xText = formatNumber(x1(i));
-        text(posX, posY, xText, 'FontSize', 8, 'Color', 'green');
-        posY = posY - 0.12;
-    end
-
-    posX= posX+(2.2*const);
-    text(posX, 0.8, '=', 'FontSize', 15, 'FontWeight', 'bold', 'Color', 'black');
-    % Mostrar el vector b
-    posY = 1;
-    posX = posX+(const/2);  % Ajustar la posición en X después del vector solución x
-    text(posX, posY, 'b', 'FontSize', 8, 'FontWeight', 'bold', 'Color', 'black');
-    posY = posY - 0.12;
-    for i = 1:size(b, 1)
-        bText = sprintf('%.2f', b(i));
-        text(posX, posY, bText, 'FontSize', 8, 'Color', 'red');
-        posY = posY - 0.12;
-    end
-
-
-    % Guardar la figura como PNG
-    staticDir = fullfile(currentDir, '..', 'app', 'static');
-    if ~exist(staticDir, 'dir')
-        mkdir(staticDir);  % Crea el directorio si no existe
-    end
-    imgPath = fullfile(staticDir, 'grafica_jacobi.png');
-    img = getframe(gcf);
-    imwrite(img.cdata, imgPath);
-    hold off;
-    close(fig);
 end
-
 
 % Función para formatear números
 function str = formatNumber(num)

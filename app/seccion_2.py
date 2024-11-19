@@ -25,10 +25,9 @@ def gaussSeidel():
         et = str(request.form['et']) 
         tol = float(request.form['tol'].replace(',', '.'))
         niter = int(request.form['niter'])
-        
 
         eng.addpath(dir_matlab)
-        [r, N, xn, E, re, c] = eng.gaussSeidel(x ,A ,b ,et ,tol ,niter , nargout=6)
+        [r, N, xn, E, re, c, A] = eng.gaussSeidel(x ,A ,b ,et ,tol ,niter, nargout=7)
         if isinstance(E, float):
             if np.isnan(E):
                 length = 0
@@ -44,13 +43,12 @@ def gaussSeidel():
         data = df.to_dict(orient='records')
         df.to_excel(os.path.join(dir_tables, 'tabla_gaussSeidel.xlsx'), index=False) 
 
-        # Lee el archivo CSV
-
-        # Escribe los datos en un nuevo archivo Excel
-
         #Gráfica
-        imagen_path = '../static/grafica_gaussSeidel.png'  # Ruta de la imagen
-        return render_template('Seccion_2/resultado_gaussSeidel.html', r=r, N=N, xn=xn, E=E, Re=re, length=length, data=data, imagen_path=imagen_path, c=c, niter=niter)
+        # Convertir matlab.double a lista de listas
+        A = list(map(list, A))
+        imagen_path = '../static/grafica_ecuaciones_gs.png'  # Ruta de la imagen
+
+        return render_template('Seccion_2/resultado_gaussSeidel.html', r=r, N=N, xn=xn, E=E, Re=re, length=length, data=data, imagen_path=imagen_path, c=c, niter=niter, A=A)
     
     return render_template('Seccion_2/formulario_gaussSeidel.html')
 
@@ -75,7 +73,7 @@ def jacobi():
         
 
         eng.addpath(dir_matlab)
-        [r, N, xn, E, Re] = eng.jacobi(x ,A ,b , tol ,niter , error_type, nargout=5)
+        [r, N, xn, E, Re, c, A] = eng.jacobi(x ,A ,b , tol ,niter , error_type, nargout=7)
         if not np.isnan(xn[0][0]):
             N, E = list(N[0]), list(E[0])
             length = len(N)
@@ -86,9 +84,10 @@ def jacobi():
         data = df.to_dict(orient='records')
         df.to_excel(os.path.join(dir_tables, 'tabla_jacobi.xlsx'), index=False) 
 
-        imagen_path = os.path.join('static', 'grafica_jacobi.png')
+        A = list(map(list, A))
+        imagen_path = '../static/grafica_jacobi.png'
 
-        return render_template('Seccion_2/resultado_jacobi.html', r=r, N=N, xn=xn, E=E, Re=Re, length=length, data=data, imagen_path=imagen_path)
+        return render_template('Seccion_2/resultado_jacobi.html', r=r, N=N, xn=xn, E=E, Re=Re, length=length, data=data, imagen_path=imagen_path, c=c, niter=niter, A=A)
     return render_template('Seccion_2/formulario_jacobi.html')
 
 
@@ -115,7 +114,7 @@ def sor():
         
         eng.addpath(dir_matlab)
         # Llamar a la función SOR
-        [r, n, xi, E, radio] = eng.SOR(x0, A, b, Tol, niter, w, tipe, nargout=5)
+        [r, n, xi, E, radio, c, A] = eng.SOR(x0, A, b, Tol, niter, w, tipe, nargout=7)
         if not np.isnan(xi[0][0]):
             n, E = list(n[0]), list(E[0])
             length = len(n)
@@ -130,9 +129,10 @@ def sor():
         data = df.to_dict(orient='records')
         df.to_excel(os.path.join(dir_tables, 'tabla_sor.xlsx'), index=False) 
 
+        A = list(map(list, A))
         imagen_path = '../static/grafica_sor.png'  # Ruta de la imagen
         # Renderizar la plantilla HTML con la tabla y el resultado
-        return render_template('Seccion_2/resultado_sor.html', r=r, n=n, xi=xi, E=E, radio=radio, length=length, data=data, imagen_path=imagen_path)
+        return render_template('Seccion_2/resultado_sor.html', r=r, n=n, xi=xi, E=E, radio=radio, length=length, data=data, imagen_path=imagen_path, c=c, niter=niter, A=A)
     return render_template('Seccion_2/formulario_sor.html')
 
 @blueprint.route('/sor/descargar', methods=['POST'])
