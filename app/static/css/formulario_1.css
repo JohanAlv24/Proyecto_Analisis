@@ -71,3 +71,15 @@ input[type="submit"] {
 input[type="submit"]:hover {
     background: #16A085;
 }
+
+/* Estilo para botones dentro del modal */
+.modal-footer .btn-secondary {
+    background-color: #1ABC9C; /* Verde similar al formulario */
+    border-color: #1ABC9C;
+    color: white;
+}
+
+.modal-footer .btn-secondary:hover {
+    background-color: #16A085; /* Verde más oscuro al pasar el mouse */
+    border-color: #16A085;
+}

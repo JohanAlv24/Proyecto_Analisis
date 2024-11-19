@@ -28,25 +28,54 @@ eng.addpath(dir_matlab)
 @blueprint.route('/punto_fijo', methods=['GET', 'POST'])
 def punto_fijo():
     if request.method == 'POST':
-        f = str(request.form['f'])
-        g = str(request.form['g'])
-        x = float(request.form['x'].replace(',', '.'))
-        tol = float(request.form['tol'].replace(',', '.'))
-        niter = int(request.form['niter'])
-        tipe = str(request.form['tipe'])
+        try:
+            # Validar y procesar los datos del formulario
+            f = str(request.form['f'])
+            g = str(request.form['g'])
+            x = float(request.form['x'].replace(',', '.'))
+            tol = float(request.form['tol'].replace(',', '.'))
+            niter = int(request.form['niter'])
+            tipe = str(request.form['tipe'])
 
-        [r, N, xn, fm, E] = eng.pf(f, g, x, tol, niter, tipe, nargout=5)
-        N, xn, fm, E = list(N[0]), list(xn[0]), list(fm[0]), list(E[0])
-        length = len(N)
+            try:
+                # Intentar ejecutar MATLAB
+                [r, N, xn, fm, E] = eng.pf(f, g, x, tol, niter, tipe, nargout=5)
+                N, xn, fm, E = list(N[0]), list(xn[0]), list(fm[0]), list(E[0])
+                length = len(N)
 
-        df = pd.read_csv(os.path.join(dir_tables, 'tabla_pf.csv'))
-        df = df.astype(str)
-        data = df.to_dict(orient='records')
-        df.to_excel(os.path.join(dir_tables, 'tabla_pf.xlsx'), index=False)
+                # Leer la tabla generada por MATLAB
+                df = pd.read_csv(os.path.join(dir_tables, 'tabla_pf.csv'))
+                df = df.astype(str)
+                data = df.to_dict(orient='records')
+                df.to_excel(os.path.join(dir_tables, 'tabla_pf.xlsx'), index=False)
 
-        imagen_path = os.path.join('static', 'grafica_pf.png')
-        return render_template('Seccion_1/resultado_pf.html', r=r, N=N, xn=xn, fm=fm, E=E, length=length, data=data, imagen_path=imagen_path, f=f)
+                imagen_path = os.path.join('static', 'grafica_pf.png')
+                return render_template(
+                    'Seccion_1/resultado_pf.html',
+                    r=r, N=N, xn=xn, fm=fm, E=E,
+                    length=length, data=data,
+                    imagen_path=imagen_path, f=f
+                )
+            except matlab.engine.MatlabExecutionError as matlab_error:
+                # Capturar errores específicos de MATLAB
+                return render_template(
+                    'Seccion_1/formulario_pf.html',
+                    error_message=f"Error en MATLAB: {str(matlab_error)}"
+                )
+
+        except ValueError:
+            return render_template(
+                error_message="Error en los datos ingresados. Por favor verifica los valores."
+            )
+        except Exception as e:
+            return render_template(
+                'Seccion_1/formulario_pf.html',
+                error_message=f"Error en la sintaxis, para mas informacion ir al apartado de ayuda"
+            )
+
+    # Si es una solicitud GET, renderiza el formulario vacío
     return render_template('Seccion_1/formulario_pf.html')
+
 
 @blueprint.route('/pf/descargar', methods=['POST'])
 def descargar_archivo_pf():
@@ -57,55 +86,70 @@ def descargar_archivo_pf():
 @blueprint.route('/biseccion', methods=['GET', 'POST'])
 def biseccion():
     if request.method == 'POST':
-        # Obtener datos del formulario
-        f = str(request.form['f'])
-        xi = float(request.form['xi'].replace(',', '.'))
-        xs = float(request.form['xs'].replace(',', '.'))
-        tol = float(request.form['tol'].replace(',', '.'))
-        niter = int(request.form['niter'])
-        tipe = str(request.form['tipe'])
-
         try:
-            # Ejecutar la función de MATLAB
-            [r, N, xn, fm, E] = eng.biseccion(f, xi, xs, tol, niter, tipe, nargout=5)
+            # Validar y procesar los datos del formulario
+            f = str(request.form['f'])
+            xi = float(request.form['xi'].replace(',', '.'))
+            xs = float(request.form['xs'].replace(',', '.'))
+            tol = float(request.form['tol'].replace(',', '.'))
+            niter = int(request.form['niter'])
+            tipe = str(request.form['tipe'])
 
-            # Convertir resultados en listas
-            if len(N) != 0:
-                N, xn, fm, E = list(N[0]), list(xn[0]), list(fm[0]), list(E[0])
-            else:
-                N, xn, fm, E = [], [], [], []
+            try:
+                # Ejecutar la función de MATLAB
+                [r, N, xn, fm, E] = eng.biseccion(f, xi, xs, tol, niter, tipe, nargout=5)
 
-            length = len(N)
+                # Convertir resultados en listas
+                if len(N) != 0:
+                    N, xn, fm, E = list(N[0]), list(xn[0]), list(fm[0]), list(E[0])
+                else:
+                    N, xn, fm, E = [], [], [], []
 
-            # Leer y procesar la tabla de resultados
-            tabla_path = os.path.join(dir_tables, 'tabla_biseccion.csv')
-            if os.path.exists(tabla_path):
-                df = pd.read_csv(tabla_path)
-                df = df.astype(str)
-                data = df.to_dict(orient='records')
-            else:
-                data = []
+                length = len(N)
 
-            # Procesar la ruta de la gráfica
-            imagen_path = os.path.join(dir_actual, 'static', 'grafica_biseccion.png')
-            if not os.path.exists(imagen_path):
-                imagen_path = None
-            else:
-                imagen_path = url_for('static', filename='grafica_biseccion.png')
+                # Leer y procesar la tabla de resultados
+                tabla_path = os.path.join(dir_tables, 'tabla_biseccion.csv')
+                if os.path.exists(tabla_path):
+                    df = pd.read_csv(tabla_path)
+                    df = df.astype(str)
+                    data = df.to_dict(orient='records')
+                else:
+                    data = []
 
-            # Renderizar resultados
+                # Procesar la ruta de la gráfica
+                imagen_path = os.path.join(dir_actual, 'static', 'grafica_biseccion.png')
+                if not os.path.exists(imagen_path):
+                    imagen_path = None
+                else:
+                    imagen_path = url_for('static', filename='grafica_biseccion.png')
+
+                # Renderizar resultados
+                return render_template(
+                    'Seccion_1/resultado_biseccion.html',
+                    r=r, N=N, xn=xn, fm=fm, E=E,
+                    length=length, data=data,
+                    imagen_path=imagen_path, f=f
+                )
+
+            except matlab.engine.MatlabExecutionError as matlab_error:
+                # Capturar errores específicos de MATLAB
+                return render_template(
+                    'Seccion_1/formulario_biseccion.html',
+                    error_message=f"Error en MATLAB: {str(matlab_error)}"
+                )
+
+        except ValueError:
             return render_template(
-                'Seccion_1/resultado_biseccion.html',
-                r=r, N=N, xn=xn, fm=fm, E=E,
-                length=length, data=data,
-                imagen_path=imagen_path, f=f
+                'Seccion_1/formulario_biseccion.html',
+                error_message="Error en los datos ingresados. Por favor verifica los valores."
+            )
+        except Exception as e:
+            return render_template(
+                'Seccion_1/formulario_biseccion.html',
+                error_message="Error en la sintaxis, para más información revisa el apartado de ayuda."
             )
 
-        except Exception as e:
-            print(f"Error en MATLAB: {e}")
-            return f"Error en la ejecución de MATLAB: {e}"
-
-    # Renderizar formulario
+    # Renderizar formulario vacío en GET
     return render_template('Seccion_1/formulario_biseccion.html')
 
 # Ruta para descargar el archivo de resultados
@@ -122,24 +166,50 @@ def descargar_archivo_biseccion():
 @blueprint.route('/multiple_roots', methods=['GET', 'POST'])
 def multiple_roots():
     if request.method == 'POST':
-        fn = str(request.form['fn'])
-        xi = float(request.form['xi'].replace(',', '.'))
-        tol = float(request.form['tol'].replace(',', '.'))
-        k = int(request.form['k'])
-        et = str(request.form['et'])
+        try:
+            # Validar y procesar los datos del formulario
+            fn = str(request.form['fn'])
+            xi = float(request.form['xi'].replace(',', '.'))
+            tol = float(request.form['tol'].replace(',', '.'))
+            k = int(request.form['k'])
+            et = str(request.form['et'])
 
-        eng.addpath(dir_matlab)
-        [xi, errores, resultado] = eng.raices_multiples(fn, xi, tol, k, et, nargout=3)
-        
-        # Leer resultados del archivo CSV
-        df = pd.read_csv(os.path.join(dir_tables, 'multiple_roots_results.csv'))
-        df = df.astype(str)
-        data = df.to_dict(orient='records')
-        df.to_excel(os.path.join(dir_tables, 'multiple_roots_results.xlsx'), index=False)
+            try:
+                # Llamar a MATLAB
+                [xi, errores, resultado] = eng.raices_multiples(fn, xi, tol, k, et, nargout=3)
 
-        imagen_path = os.path.join('static', 'grafica_multiple_roots.png')
+                # Leer resultados del archivo CSV
+                df = pd.read_csv(os.path.join(dir_tables, 'multiple_roots_results.csv'))
+                df = df.astype(str)
+                data = df.to_dict(orient='records')
+                df.to_excel(os.path.join(dir_tables, 'multiple_roots_results.xlsx'), index=False)
 
-        return render_template('Seccion_1/resultado_raicesm.html', data=data, imagen_path=imagen_path, resultado=resultado, fn=fn)
+                imagen_path = os.path.join('static', 'grafica_multiple_roots.png')
+
+                return render_template(
+                    'Seccion_1/resultado_raicesm.html',
+                    data=data, imagen_path=imagen_path, resultado=resultado, fn=fn
+                )
+
+            except matlab.engine.MatlabExecutionError as matlab_error:
+                # Capturar errores específicos de MATLAB
+                return render_template(
+                    'Seccion_1/formulario_raicesm.html',
+                    error_message=f"Error en MATLAB: {str(matlab_error)}"
+                )
+
+        except ValueError:
+            return render_template(
+                'Seccion_1/formulario_raicesm.html',
+                error_message="Error en los datos ingresados. Por favor verifica los valores."
+            )
+        except Exception as e:
+            return render_template(
+                'Seccion_1/formulario_raicesm.html',
+                error_message="Error en la sintaxis, para más información revisa el apartado de ayuda."
+            )
+
+    # Renderizar formulario vacío en GET
     return render_template('Seccion_1/formulario_raicesm.html')
 
 
@@ -153,45 +223,60 @@ def descargar_archivo_raicesm():
 @blueprint.route('/secante', methods=['GET', 'POST'])
 def secante():
     if request.method == 'POST':
-        f = str(request.form['f']) 
-        x0 = float(request.form['x0'].replace(',', '.'))
-        x1 = float(request.form['x1'].replace(',', '.'))  
-        tol = float(request.form['tol'].replace(',', '.'))
-        Terror = str(request.form['Terror'])
-        niter = int(request.form['niter'])
-        
-        # Agregar directorio MATLAB
-        eng.addpath(dir_matlab)
+        try:
+            # Validar y procesar los datos del formulario
+            f = str(request.form['f'])
+            x0 = float(request.form['x0'].replace(',', '.'))
+            x1 = float(request.form['x1'].replace(',', '.'))
+            tol = float(request.form['tol'].replace(',', '.'))
+            Terror = str(request.form['Terror'])
+            niter = int(request.form['niter'])
 
-        # Llamar a la función de MATLAB
-        respuesta = eng.secante(f, x0, x1, tol, niter, Terror)
+            try:
+                # Llamar a la función de MATLAB
+                respuesta = eng.secante(f, x0, x1, tol, niter, Terror)
 
-        # Leer el archivo CSV exportado
-        csv_path = os.path.join(dir_tables, 'tabla_secante.csv')
-        df = pd.read_csv(csv_path)
-        
-        # Depuración: verificar las columnas
-        print(df.head())  # Esto imprimirá las primeras filas en la consola
-        
-        # Convertir a lista de diccionarios
-        data = df.to_dict(orient='records')
+                # Leer el archivo CSV exportado
+                csv_path = os.path.join(dir_tables, 'tabla_secante.csv')
+                df = pd.read_csv(csv_path)
 
-        # Guardar el archivo Excel (opcional)
-        excel_path = os.path.join(dir_tables, 'tabla_secante.xlsx')
-        df.to_excel(excel_path, index=False) 
+                # Convertir a lista de diccionarios
+                data = df.to_dict(orient='records')
 
-        print(df.columns)
+                # Guardar el archivo Excel (opcional)
+                excel_path = os.path.join(dir_tables, 'tabla_secante.xlsx')
+                df.to_excel(excel_path, index=False)
 
-        # Ruta de la gráfica
-        imagen_path = os.path.join('static', 'grafica_secante.png')
-        return render_template(
-            'Seccion_1/resultado_secante.html',
-            respuesta=respuesta,
-            data=data,
-            imagen_path=imagen_path,
-            f=f
-        )
-        
+                # Ruta de la gráfica
+                imagen_path = os.path.join('static', 'grafica_secante.png')
+
+                return render_template(
+                    'Seccion_1/resultado_secante.html',
+                    respuesta=respuesta,
+                    data=data,
+                    imagen_path=imagen_path,
+                    f=f
+                )
+
+            except matlab.engine.MatlabExecutionError as matlab_error:
+                # Capturar errores específicos de MATLAB
+                return render_template(
+                    'Seccion_1/formulario_secante.html',
+                    error_message=f"Error en MATLAB: {str(matlab_error)}"
+                )
+
+        except ValueError:
+            return render_template(
+                'Seccion_1/formulario_secante.html',
+                error_message="Error en los datos ingresados. Por favor verifica los valores."
+            )
+        except Exception as e:
+            return render_template(
+                'Seccion_1/formulario_secante.html',
+                error_message="Error en la sintaxis, para más información revisa el apartado de ayuda."
+            )
+
+    # Renderizar formulario vacío en GET
     return render_template('Seccion_1/formulario_secante.html')
 
 
@@ -208,30 +293,60 @@ def descargar_archivo():
 @blueprint.route('/rf', methods=['GET', 'POST'])
 def reglaFalsa():
     if request.method == 'POST':
-        f= str(request.form['f']) 
-        x0 = float(request.form['x0'].replace(',', '.'))
-        x1 = float(request.form['x1'].replace(',', '.'))  
-        tol = float(request.form['tol'].replace(',', '.'))
-        Terror = str(request.form['Terror'])
-        niter = int(request.form['niter'])
-        
-        eng.addpath(dir_matlab)
+        try:
+            # Validar y procesar los datos del formulario
+            f = str(request.form['f'])
+            x0 = float(request.form['x0'].replace(',', '.'))
+            x1 = float(request.form['x1'].replace(',', '.'))
+            tol = float(request.form['tol'].replace(',', '.'))
+            Terror = str(request.form['Terror'])
+            niter = int(request.form['niter'])
 
-        respuesta = eng.rf(f, x0, x1, tol, niter, Terror)
-        print(respuesta[0])
-        df = pd.read_csv(os.path.join(dir_tables,'tabla_reglaFalsa.csv'))
-        df = df.astype(str)
-        data = df.to_dict(orient='records')
+            try:
+                # Llamar a la función de MATLAB
+                respuesta = eng.rf(f, x0, x1, tol, niter, Terror)
 
-        # Lee el archivo CSV
-        df = pd.read_csv(os.path.join(dir_tables,'tabla_reglaFalsa.csv'))
-        # Escribe los datos en un nuevo archivo Excel
-        df.to_excel(os.path.join(dir_tables,'tabla_reglaFalsa.xlsx'), index=False) 
+                # Leer el archivo CSV exportado
+                csv_path = os.path.join(dir_tables, 'tabla_reglaFalsa.csv')
+                df = pd.read_csv(csv_path)
 
-        #Gráfica
-        imagen_path = os.path.join('static','grafica_reglaFalsa.png')  # Ruta de la imagen
-        return render_template('Seccion_1/resultado_reglaFalsa.html',respuesta=respuesta, data=data,imagen_path=imagen_path, f=f)
-        
+                # Convertir a lista de diccionarios
+                data = df.to_dict(orient='records')
+
+                # Guardar el archivo Excel (opcional)
+                excel_path = os.path.join(dir_tables, 'tabla_reglaFalsa.xlsx')
+                df.to_excel(excel_path, index=False)
+
+                # Ruta de la gráfica
+                imagen_path = os.path.join('static', 'grafica_reglaFalsa.png')
+
+                return render_template(
+                    'Seccion_1/resultado_reglaFalsa.html',
+                    respuesta=respuesta,
+                    data=data,
+                    imagen_path=imagen_path,
+                    f=f
+                )
+
+            except matlab.engine.MatlabExecutionError as matlab_error:
+                # Capturar errores específicos de MATLAB
+                return render_template(
+                    'Seccion_1/formulario_reglaFalsa.html',
+                    error_message=f"Error en MATLAB: {str(matlab_error)}"
+                )
+
+        except ValueError:
+            return render_template(
+                'Seccion_1/formulario_reglaFalsa.html',
+                error_message="Error en los datos ingresados. Por favor verifica los valores."
+            )
+        except Exception as e:
+            return render_template(
+                'Seccion_1/formulario_reglaFalsa.html',
+                error_message="Error en la sintaxis, para más información revisa el apartado de ayuda."
+            )
+
+    # Renderizar formulario vacío en GET
     return render_template('Seccion_1/formulario_reglaFalsa.html')
 
 @blueprint.route('/rf/descargar', methods=['POST'])
@@ -244,39 +359,63 @@ def descargar_archivorf():
 
 #Método de newton
 @blueprint.route('/newton', methods=['GET', 'POST'])
+@blueprint.route('/newton', methods=['GET', 'POST'])
 def newton():
     if request.method == 'POST':
-        f = str(request.form['f']) 
-        x = float(request.form['x'].replace(',', '.'))
-        tol = float(request.form['tol'].replace(',', '.'))
-        niter = int(request.form['niter'])
-        et = str(request.form['et'])
-
         try:
-            [r, N, xn, fm, dfm, E, c] = eng.newton(f, x, tol, niter, et, nargout=7)
+            # Validar y procesar los datos del formulario
+            f = str(request.form['f'])
+            x = float(request.form['x'].replace(',', '.'))
+            tol = float(request.form['tol'].replace(',', '.'))
+            niter = int(request.form['niter'])
+            et = str(request.form['et'])
 
-            # Leer archivo CSV
-            csv_path = os.path.join(dir_tables, 'tabla_newton.csv')
-            df = pd.read_csv(csv_path)
-            data = df.to_dict(orient='records')
+            try:
+                # Llamar a la función de MATLAB
+                [r, N, xn, fm, dfm, E, c] = eng.newton(f, x, tol, niter, et, nargout=7)
 
-            # Guardar archivo Excel (opcional)
-            excel_path = os.path.join(dir_tables, 'tabla_newton.xlsx')
-            df.to_excel(excel_path, index=False)
+                # Leer archivo CSV
+                csv_path = os.path.join(dir_tables, 'tabla_newton.csv')
+                df = pd.read_csv(csv_path)
+                data = df.to_dict(orient='records')
 
-            # Generar URL de la gráfica
-            safe_f_str = ''.join(c if c.isalnum() else '_' for c in f)
-            imagen_path = url_for('static', filename=f'{safe_f_str}.svg')
+                # Guardar archivo Excel (opcional)
+                excel_path = os.path.join(dir_tables, 'tabla_newton.xlsx')
+                df.to_excel(excel_path, index=False)
 
+                # Generar URL de la gráfica
+                safe_f_str = ''.join(c if c.isalnum() else '_' for c in f)
+                imagen_path = url_for('static', filename=f'{safe_f_str}.svg')
+
+                return render_template(
+                    'Seccion_1/resultado_newton.html',
+                    r=r, f=f, data=data,
+                    imagen_path=imagen_path
+                )
+
+            except matlab.engine.MatlabExecutionError as matlab_error:
+                # Capturar errores específicos de MATLAB
+                return render_template(
+                    'Seccion_1/formulario_newton.html',
+                    error_message=f"Error en MATLAB: {str(matlab_error)}"
+                )
+
+        except ValueError:
+            # Capturar errores en los datos ingresados
             return render_template(
-                'Seccion_1/resultado_newton.html',
-                r=r, f=f, data=data,
-                imagen_path=imagen_path
+                'Seccion_1/formulario_newton.html',
+                error_message="Error en los datos ingresados. Por favor verifica los valores."
             )
         except Exception as e:
-            return f"Error: {str(e)}", 400
-            
+            # Capturar errores generales
+            return render_template(
+                'Seccion_1/formulario_newton.html',
+                error_message="Error en la sintaxis, para más información revisa el apartado de ayuda."
+            )
+
+    # Renderizar formulario vacío en GET
     return render_template('Seccion_1/formulario_newton.html')
+
 
 
 
