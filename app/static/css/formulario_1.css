@@ -56,7 +56,7 @@ select {
 }
 
 input[type="submit"] {
-    background: #1ABC9C;
+    background: #E05243;
     color: #fff;
     border: none;
     padding: 10px 20px;
@@ -74,8 +74,8 @@ input[type="submit"]:hover {
 
 /* Estilo para botones dentro del modal */
 .modal-footer .btn-secondary {
-    background-color: #1ABC9C; /* Verde similar al formulario */
-    border-color: #1ABC9C;
+    background-color: #E05243; /* Verde similar al formulario */
+    border-color: #E05243;
     color: white;
 }
 

@@ -1,9 +1,16 @@
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Bienvenido a Analisis Numerico{% endblock %}</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/home.css') }}">
+    <style>
+        .forms-container {
+            display: flex;
+            flex-direction: column; /* Cambia la disposición a columnas */
+            align-items: center; /* Centra los elementos horizontalmente */
+            gap: 10px; /* Espacio entre formularios */
+        }
+    </style>
 </head>
 
 {% extends "base.html" %}

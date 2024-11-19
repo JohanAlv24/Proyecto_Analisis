@@ -17,7 +17,7 @@ h1{
 }
 
 details {
-    background: #1ABC9C;
+    background: #E05243;
     padding: .5rem;
     border-radius: 6px;
     margin: .5rem;
@@ -106,7 +106,7 @@ p {
 }
 
 .derivative-container button[type="submit"] {
-    background: #1ABC9C;
+    background: #E05243;
     color: #fff;
     border: none;
     padding: 10px 20px;
@@ -116,7 +116,7 @@ p {
 }
 
 .derivative-container button[type="submit"]:hover {
-    background: #16A085;
+    background: #E05243;
 }
 
 .derivative-container #result {
