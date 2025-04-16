@@ -10,7 +10,7 @@ eng = matlab.engine.start_matlab()
 
 separador = os.path.sep 
 dir_actual = os.path.dirname(os.path.abspath(__file__))
-dir_matlab = separador.join(dir_actual.split(separador)[:-1])+'\matlab'
+dir_matlab = separador.join(dir_actual.split(separador)[:-1])+'\matlab_codes'
 dir_tables = os.path.join(dir_actual, 'tables')
 
 eng.addpath(dir_matlab)

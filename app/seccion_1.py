@@ -12,7 +12,7 @@ eng = matlab.engine.start_matlab()
 
 # Rutas base
 dir_actual = os.path.dirname(os.path.abspath(__file__))
-dir_matlab = os.path.join(os.path.dirname(dir_actual), 'matlab')
+dir_matlab = os.path.join(os.path.dirname(dir_actual), 'matlab_codes')
 dir_tables = os.path.join(dir_actual, 'tables')
 
 # Añadir el directorio MATLAB al path
@@ -539,3 +539,59 @@ def descargar_grafica_newton():
         return send_file(archivo_path, as_attachment=True, download_name=f'{safe_f_str}.svg')
     else:
         return "Gráfica SVG no encontrada", 404
+
+
+@blueprint.route('/informe', methods=['GET', 'POST'])
+def informe():
+    if request.method == 'POST':
+        try:
+            # Validar y procesar los datos del formulario
+            f = str(request.form['f'])
+            g = str(request.form['g'])
+            x0 = float(request.form['x0'].replace(',', '.'))
+            x1 = float(request.form['x1'].replace(',', '.'))
+            xi = float(request.form['xi'].replace(',', '.'))
+            xs = float(request.form['xs'].replace(',', '.'))
+            tol = float(request.form['tol'].replace(',', '.'))
+            niter = int(request.form['niter'])
+            tipe = str(request.form['tipe'])
+            
+
+            try:
+                # Intentar ejecutar MATLAB
+                [r, N, xn, fm, E] = eng.pf(f, g, x0, tol, niter, tipe, nargout=5)
+                N, xn, fm, E = list(N[0]), list(xn[0]), list(fm[0]), list(E[0])
+                length = len(N)
+                
+                # Leer la tabla generada por MATLAB
+                df = pd.read_csv(os.path.join(dir_tables, 'tabla_pf.csv'))
+                df = df.astype(str)
+                data = df.to_dict(orient='records')
+                df.to_excel(os.path.join(dir_tables, 'tabla_pf.xlsx'), index=False)
+
+                imagen_path = os.path.join('static', 'grafica_pf.png')
+                return render_template(
+                    'Seccion_1/resultado_pf.html',
+                    r=r, N=N, xn=xn, fm=fm, E=E,
+                    length=length, data=data,
+                    imagen_path=imagen_path, f=f
+                )
+            except matlab.engine.MatlabExecutionError as matlab_error:
+                # Capturar errores específicos de MATLAB
+                return render_template(
+                    'Seccion_1/formulario_informe.html',
+                    error_message=f"Error en MATLAB: {str(matlab_error)}"
+                )
+
+        except ValueError:
+            return render_template(
+                error_message="Error en los datos ingresados. Por favor verifica los valores."
+            )
+        except Exception as e:
+            return render_template(
+                'Seccion_1/formulario_informe.html',
+                error_message=f"Error en la sintaxis, para mas informacion ir al apartado de ayuda"
+            )
+
+    # Si es una solicitud GET, renderiza el formulario vacío
+    return render_template('Seccion_1/formulario_informe.html')

@@ -4,6 +4,9 @@ import matlab.engine
 import app.seccion_1 as seccion_1
 import app.seccion_2 as seccion_2
 import app.seccion_3 as seccion_3
+import sys
+print("PYTHON USADO POR FLASK:")
+print(sys.executable)
 
 # Crear la instancia de Flask
 app = Flask(__name__)
