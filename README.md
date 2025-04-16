@@ -4,11 +4,11 @@ Este proyecto es una aplicación web que implementa los métodos númericos vist
 ## Instalación
 1. Clona este repositorio en tu máquina local.
    ```
-   git clone https://github.com/piperuao26/Analisis-proyecto.git
+   git clone https://github.com/JohanAlv24/Proyecto_Analisis.git
 
 2. Navega al directorio del proyecto.
    ```
-   cd Analisis-proyecto
+   cd Proyecto_Analisis
 
 3. Instala las dependencias del proyecto.
    ```
