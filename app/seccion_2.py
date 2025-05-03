@@ -335,14 +335,27 @@ def informe():
                     df = pd.read_csv(tabla_path)
                     size = df.shape[1] - 5
                     data = df.astype(str).to_dict(orient='records')
+
+                    if 'Fracasa' in df['Result'].tolist():
+                        data_iter = 0
+                        data_error = 0
+                    else:
+                
+                        min_error = df.sort_values(by='Error').iloc[0]['Error']
+                        min_iter  = df.sort_values(by='Iteration').iloc[0]['Iteration']
+
+                        data_iter = df[df['Iteration']==min_iter].drop(['RE', 'Result'], axis=1).astype(str).to_dict(orient='records')
+                        data_error = df[df['Error']==min_error].drop(['RE', 'Result'], axis=1).astype(str).to_dict(orient='records')
                 else:
                     data = []
+                    data_iter = 0
+                    data_error = 0
                     size = 0
                 x_vars = [f"x{i}" for i in range(1, size+1)]
                 # Renderizar resultados
                 return render_template(
                     'Seccion_2/resultado_informe2.html',
-                    r=r, methods=methods, N=N, xn=xf, E=E, Re=Re, length=length, data=data, x_vars=x_vars
+                    length=length, data=data, x_vars=x_vars, data_iter=data_iter, data_error=data_error
                 )
 
             except matlab.engine.MatlabExecutionError as matlab_error:
@@ -366,7 +379,7 @@ def informe():
             error_message = "Error de sintaxis, para más información ir al apartado de ayuda."
             return render_template(
                 'Seccion_2/formulario_informe2.html',
-                error_message=error_message
+                error_message=e
             )
 
     # Si es una solicitud GET, renderizar el formulario vacío
@@ -375,7 +388,7 @@ def informe():
 @blueprint.route('/informe2/descargar', methods=['POST'])
 def descargar_archivo_informe2():
     # Ruta del archivo que se va a descargar
-    archivo_path = 'tables/tabla_informe2.xlsx'
+    archivo_path = 'tables/tabla_informe2.csv'
 
     # Enviar el archivo al cliente para descargar
     return send_file(archivo_path, as_attachment=True)

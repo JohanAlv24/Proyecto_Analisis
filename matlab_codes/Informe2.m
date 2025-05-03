@@ -115,8 +115,8 @@ function [r, methods, E, X1, Re, iter] = Informe2(x0, A, b, Tol, niter, w1, w2, 
     end
     % Suponiendo que x1_j, x1_g, etc. son vectores columna
     X1 = [x1_j'; x1_g'; x1_s1'; x1_s2'; x1_s3'];
-    %r = repmat({'Fracasa'}, 1, 5);
-    r = zeros(1, 5);
+    r = repmat({'Fracasa'}, 1, 5);
+    %r = zeros(1, 5);
     E = [error_j; error_g; error_sor1; error_sor2; error_sor3];
     Re = [Re_j; Re_g; Re1; Re2; Re3];
     iter = [iter_j; iter_g; iter_sor1; iter_sor2; iter_sor3];
@@ -124,8 +124,8 @@ function [r, methods, E, X1, Re, iter] = Informe2(x0, A, b, Tol, niter, w1, w2, 
     
     for i = (1:5)
         if E(i)<Tol
-            %r(i) = 'Halla solucion';
-            r(i) = 1;
+            r{i} = 'Triunfa';
+            %r(i) = 1;
         end
     end
     % Crear nombres para las variables x1, x2, ..., xn
