@@ -359,7 +359,6 @@ def descargar_archivorf():
 
 #Método de newton
 @blueprint.route('/newton', methods=['GET', 'POST'])
-@blueprint.route('/newton', methods=['GET', 'POST'])
 def newton():
     if request.method == 'POST':
         try:

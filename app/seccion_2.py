@@ -294,3 +294,88 @@ def descargar_archivo_sor():
     # Enviar el archivo al cliente para descargar
     return send_file(archivo_path, as_attachment=True)
 
+#Informe Comparativo
+@blueprint.route('/informe2', methods=['GET', 'POST'])
+def informe():
+    if request.method == 'POST':
+        try:
+            # Validar y procesar datos del formulario
+            A = request.form['A']
+            b = request.form['b']
+            x = request.form['x']
+            error_type = request.form['error_type']
+            tol = float(request.form['tol'].replace(',', '.'))
+            w1 = float(request.form['w1'].replace(',', '.'))
+            w2 = float(request.form['w2'].replace(',', '.'))
+            w3 = float(request.form['w3'].replace(',', '.'))
+            niter = int(request.form['niter'])
+            # Validar entradas
+            if not A or not b or not x:
+                raise ValueError("Debe ingresar las matrices A, b y el vector inicial x.")
+            if tol <= 0:
+                raise ValueError("La tolerancia debe ser un valor positivo.")
+            if niter <= 0:
+                raise ValueError("El número de iteraciones debe ser un entero positivo.")
+
+            try:
+                # Ejecutar MATLAB
+                eng.addpath(dir_matlab)
+                [r, methods, E, X1, Re, iter] = eng.Informe2(x, A, b, tol, niter, w1, w2, w3, error_type, nargout=6)
+
+                # Procesar resultados
+                if not np.isnan(X1[0][0]):
+                    r, methods, N, E, xf, Re = list(r[0]), list(methods[0]), list(iter[0]), list(E[0]), list(X1[0]), list(Re[0])
+                    length = len(N)
+                else:
+                    length = 0
+
+                # Leer y procesar el archivo CSV generado por MATLAB
+                tabla_path = os.path.join(dir_tables, 'tabla_informe2.csv')
+                if os.path.exists(tabla_path):
+                    df = pd.read_csv(tabla_path)
+                    size = df.shape[1] - 5
+                    data = df.astype(str).to_dict(orient='records')
+                else:
+                    data = []
+                    size = 0
+                x_vars = [f"x{i}" for i in range(1, size+1)]
+                # Renderizar resultados
+                return render_template(
+                    'Seccion_2/resultado_informe2.html',
+                    r=r, methods=methods, N=N, xn=xf, E=E, Re=Re, length=length, data=data, x_vars=x_vars
+                )
+
+            except matlab.engine.MatlabExecutionError as matlab_error:
+                # Capturar errores de MATLAB y renderizar el formulario con un mensaje de error
+                error_message = f"Error en MATLAB: {str(matlab_error)}"
+                return render_template(
+                    'Seccion_2/formulario_informe2.html',
+                    error_message=error_message
+                )
+
+        except ValueError as ve:
+            # Errores específicos de validación
+            error_message = str(ve)
+            return render_template(
+                'Seccion_2/formulario_informe2.html',
+                error_message=error_message
+            )
+
+        except Exception as e:
+            # Capturar cualquier otro error
+            error_message = "Error de sintaxis, para más información ir al apartado de ayuda."
+            return render_template(
+                'Seccion_2/formulario_informe2.html',
+                error_message=error_message
+            )
+
+    # Si es una solicitud GET, renderizar el formulario vacío
+    return render_template('Seccion_2/formulario_informe2.html')
+
+@blueprint.route('/informe2/descargar', methods=['POST'])
+def descargar_archivo_informe2():
+    # Ruta del archivo que se va a descargar
+    archivo_path = 'tables/tabla_informe2.xlsx'
+
+    # Enviar el archivo al cliente para descargar
+    return send_file(archivo_path, as_attachment=True)
