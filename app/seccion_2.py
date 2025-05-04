@@ -336,7 +336,7 @@ def informe():
                     size = df.shape[1] - 5
                     data = df.astype(str).to_dict(orient='records')
 
-                    if 'Fracasa' in df['Result'].tolist():
+                    if 'Triunfa' not in df['Result'].tolist():
                         data_iter = 0
                         data_error = 0
                     else:
