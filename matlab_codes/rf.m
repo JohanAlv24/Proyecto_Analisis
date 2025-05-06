@@ -23,7 +23,8 @@ function [respuesta] = ReglaFalsa(func, x0, x1, Tol, niter, Terror)
         respuesta = sprintf('El límite superior %f es raíz de f(x)', xs(c));
         return;
     elseif fi(c) * fs(c) > 0
-        respuesta = 'El intervalo proporcionado no es adecuado.';
+        error('ReglaFalsa:IntervaloInvalido', ...
+        'El intervalo es inadecuado: f(x0) * f(x1) >= 0');
         return;
     end
 
@@ -102,7 +103,7 @@ function [respuesta] = ReglaFalsa(func, x0, x1, Tol, niter, Terror)
     if ~exist(staticDir, 'dir')
         mkdir(staticDir);
     end
-    svgPath = fullfile(staticDir, [safe_func, '.svg']);
+    svgPath = fullfile(staticDir, ['rf.svg']);
     saveas(fig, svgPath, 'svg');
     disp(['Gráfica SVG generada en: ', svgPath]);
     close(fig);

@@ -60,7 +60,7 @@ Resultado de Raíces Múltiples
         <h2 class="mb-3">Gráfica</h2>
         {% if imagen_path %}
         <div class="text-center">
-            <img src="{{ imagen_path }}" alt="Gráfica de Raíces Múltiples" class="img-fluid mb-3">
+            <img src="{{ url_for('static', filename='raices.svg') }}" alt="Gráfica de Raíces Múltiples" class="img-fluid mb-3">
         </div>
         {% else %}
         <p class="text-warning text-center">No se pudo generar la gráfica.</p>

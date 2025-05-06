@@ -13,12 +13,12 @@ function [r, N, xn, fm, dfm, E, c] = newton(f_str, x0, Tol, niter, et)
     dfm(c+1) = df(x0);
     dfe = dfm(c+1);
     E(c+1) = Tol + 1;
-    error = E(c+1);
+    err = E(c+1);
     xn(c+1) = x0;
     N(c+1) = c;
     
     % Iteraciones del método
-    while error > Tol && c < niter
+    while err > Tol && c < niter
         xn(c+2) = x0 - fe / dfe;
         fm(c+2) = f(xn(c+2));
         fe = fm(c+2);
@@ -36,7 +36,7 @@ function [r, N, xn, fm, dfm, E, c] = newton(f_str, x0, Tol, niter, et)
             E(c+2) = abs(xn(c+2) - x0) / abs(xn(c+2));
         end
         
-        error = E(c+2);
+        err = E(c+2);
         x0 = xn(c+2);
         N(c+2) = c+1;
         c = c + 1;
@@ -45,7 +45,7 @@ function [r, N, xn, fm, dfm, E, c] = newton(f_str, x0, Tol, niter, et)
     % Mensajes de resultado
     if fe == 0
        r = sprintf('%f es raíz de f(x)', x0);
-    elseif error < Tol
+    elseif err < Tol
        r = sprintf('%f es una aproximación de una raíz de f(x) con una tolerancia = %f', x0, Tol);
     else 
        r = sprintf('Fracasó en %f iteraciones', niter);
@@ -105,7 +105,7 @@ function [r, N, xn, fm, dfm, E, c] = newton(f_str, x0, Tol, niter, et)
 
     % Generar nombre seguro para el archivo
     safe_f_str = regexprep(f_str, '[^a-zA-Z0-9]', '_');
-    svgPath = fullfile(staticDir, [safe_f_str '.svg']);
+    svgPath = fullfile(staticDir, ['newton.svg']);
     disp(['Guardando gráfica como: ', svgPath]);
     saveas(fig, svgPath, 'svg'); % Guardar como SVG
     close(fig); % Cerrar la figura
