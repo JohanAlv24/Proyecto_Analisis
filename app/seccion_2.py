@@ -344,8 +344,11 @@ def informe():
                         min_error = df.sort_values(by='Error').iloc[0]['Error']
                         min_iter  = df.sort_values(by='Iteration').iloc[0]['Iteration']
 
-                        data_iter = df[df['Iteration']==min_iter].drop(['RE', 'Result'], axis=1).astype(str).to_dict(orient='records')
-                        data_error = df[df['Error']==min_error].drop(['RE', 'Result'], axis=1).astype(str).to_dict(orient='records')
+                        #Diccionario de métodos con menor iteraciones y menor error
+                        data_iter = df[(df['Iteration']==min_iter) & ('Triunfa' in df['Result'])].drop(['RE', 'Result'], axis=1).astype(str).to_dict(orient='records')
+                        data_error = df[(df['Error']==min_error) & ('Triunfa' in df['Result'])].drop(['RE', 'Result'], axis=1).astype(str).to_dict(orient='records')
+                     
+                        
                 else:
                     data = []
                     data_iter = 0
