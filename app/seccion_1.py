@@ -558,22 +558,20 @@ def informe():
 
             try:
                 # Intentar ejecutar MATLAB
-                [r, N, xn, fm, E] = eng.pf(f, g, x0, tol, niter, tipe, nargout=5)
+                [r, N, xn, fm, E] = eng.Informe1(f, g, x0, x1, xi, xs, tol, niter, tipe, nargout=9)
                 N, xn, fm, E = list(N[0]), list(xn[0]), list(fm[0]), list(E[0])
                 length = len(N)
                 
                 # Leer la tabla generada por MATLAB
-                df = pd.read_csv(os.path.join(dir_tables, 'tabla_pf.csv'))
+                df = pd.read_csv(os.path.join(dir_tables, 'tabla_Informe1.csv'))
                 df = df.astype(str)
                 data = df.to_dict(orient='records')
-                df.to_excel(os.path.join(dir_tables, 'tabla_pf.xlsx'), index=False)
+                df.to_excel(os.path.join(dir_tables, 'tabla_Informe1.xlsx'), index=False)
 
-                imagen_path = os.path.join('static', 'grafica_pf.png')
                 return render_template(
-                    'Seccion_1/resultado_pf.html',
+                    'Seccion_1/resultado_Informe1.html',
                     r=r, N=N, xn=xn, fm=fm, E=E,
-                    length=length, data=data,
-                    imagen_path=imagen_path, f=f
+                    length=length, data=data, f=f
                 )
             except matlab.engine.MatlabExecutionError as matlab_error:
                 # Capturar errores específicos de MATLAB

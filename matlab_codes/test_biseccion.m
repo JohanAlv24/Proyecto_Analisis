@@ -3,7 +3,7 @@
 clc;
 clear;
 
-% Function definition and parameters
+% Definicion de Parametros
 f_str = 'x^3 - x - 2';
 xi = 1;
 xs = 2;
@@ -11,7 +11,6 @@ Tol = 1e-6;
 niter = 50;
 tipe = 'Cifras Significativas';
 
-% Call the biseccion function
 [r, N, xn, fm, E] = biseccion(f_str, xi, xs, Tol, niter, tipe);
 
 % Display results

@@ -10,9 +10,9 @@ function [xi, errores, resultado] = multiple_roots(fn_str, xi, tol, k, et)
     ddfn = @(x) (dfn(x + 1e-6) - dfn(x)) / 1e-6; % Segunda derivada numérica
 
     % Inicializar variables
-    errores = [];
+    errores = [tol + 1];
     xis = [xi]; % Inicializar con el valor inicial
-    error = tol + 1;
+    error = tol+1;
     n = 0;
 
     % Iteración principal del método
