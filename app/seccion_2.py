@@ -335,24 +335,26 @@ def informe():
                     df = pd.read_csv(tabla_path)
                     size = df.shape[1] - 5
                     data = df.astype(str).to_dict(orient='records')
-
-                    if 'Triunfa' not in df['Result'].tolist():
-                        data_iter = 0
-                        data_error = 0
-                    else:
-                
-                        min_error = df.sort_values(by='Error').iloc[0]['Error']
-                        min_iter  = df.sort_values(by='Iteration').iloc[0]['Iteration']
+                    data_iter = 0
+                    data_error = 0
+                    
+                    if 'Triunfa' in df['Result'].tolist():
+                        min_error = df[df['Result'].str.contains('Triunfa')].sort_values(by='Error').iloc[0]['Error']
+                        min_iter  = df[df['Result'].str.contains('Triunfa')].sort_values(by='Iteration').iloc[0]['Iteration']
 
                         #Diccionario de métodos con menor iteraciones y menor error
-                        data_iter = df[(df['Iteration']==min_iter) & ('Triunfa' in df['Result'])].drop(['RE', 'Result'], axis=1).astype(str).to_dict(orient='records')
-                        data_error = df[(df['Error']==min_error) & ('Triunfa' in df['Result'])].drop(['RE', 'Result'], axis=1).astype(str).to_dict(orient='records')
+                        data_iter = df[(df['Iteration']==min_iter)].drop(['RE', 'Result'], axis=1).astype(str).to_dict(orient='records')
+                        data_error = df[(df['Error']==min_error)].drop(['RE', 'Result'], axis=1).astype(str).to_dict(orient='records')
+                        
+                    if len(data_iter)==0:
+                        data_iter = 0
+                    if len(data_error)==0:
+                        data_error = 0
                      
                         
                 else:
                     data = []
-                    data_iter = 0
-                    data_error = 0
+                    
                     size = 0
                 x_vars = [f"x{i}" for i in range(1, size+1)]
                 # Renderizar resultados
