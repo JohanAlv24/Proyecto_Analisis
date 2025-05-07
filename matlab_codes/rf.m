@@ -1,4 +1,4 @@
-function [respuesta] = ReglaFalsa(func, x0, x1, Tol, niter, Terror)
+function [respuesta, c, x1_rf, f_rf, E_rf] = ReglaFalsa(func, x0, x1, Tol, niter, Terror)
     % Convertir la función de entrada a un handle de función
     f = str2func(['@(x)', func]);
 
@@ -70,7 +70,9 @@ function [respuesta] = ReglaFalsa(func, x0, x1, Tol, niter, Terror)
     else
         respuesta = sprintf('Fracasó en %d iteraciones', niter);
     end
-
+    x1_rf = xm;
+    f_rf = fm;
+    E_rf = E;
     % Crear tabla de resultados
     T = table((1:c)', xm', xi', xs', fm', fi', fs', E', ...
         'VariableNames', ["n", "x_m", "x_i", "x_s", "f_m", "f_i", "f_s", "E"]);
