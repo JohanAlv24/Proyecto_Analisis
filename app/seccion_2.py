@@ -46,17 +46,33 @@ def gaussSeidel():
                 # Procesar resultados
                 if isinstance(E, float) and np.isnan(E):
                     length = 0
+                    data=[]
                 else:
-                    N, xn, E = list(N[0]), list(xn[0]), list(E[0])
+                    N = list(range(1, len(E[0])+1)) if isinstance(E, np.ndarray) else [1]
+                    E = list(E[0]) if isinstance(E, np.ndarray) else [E]
+                    xn = list(xn[0]) if isinstance(xn, np.ndarray) else [xn]
                     length = len(N)
-
-                # Leer y procesar el archivo CSV generado por MATLAB
-                tabla_path = os.path.join(dir_tables, 'tabla_gaussSeidel.csv')
-                if os.path.exists(tabla_path):
-                    df = pd.read_csv(tabla_path)
-                    data = df.astype(str).to_dict(orient='records')
-                else:
-                    data = []
+                    
+                    # Procesar el archivo CSV generado por MATLAB
+                    tabla_path = os.path.join(dir_tables, 'tabla_gaussSeidel.csv')
+                    if os.path.exists(tabla_path):
+                        df = pd.read_csv(tabla_path)
+                        
+                        # Convertir la columna 'xn' en múltiples columnas x1, x2, etc.
+                        if 'xn' in df.columns:
+                            # Extraer valores numéricos de la cadena [x1;x2;...;xn]
+                            xn_values = df['xn'].str.extractall(r'([-+]?\d*\.?\d+)').unstack()
+                            xn_values.columns = [f'x{i+1}' for i in range(xn_values.shape[1])]
+                            
+                            # Combinar con las otras columnas
+                            df = pd.concat([pd.DataFrame({'N': range(1, len(df)+1)}),  
+                                 df[['E']],
+                                xn_values
+                            ], axis=1)
+                        
+                        data = df.astype(str).to_dict(orient='records')
+                    else:
+                        data = []
 
                 # Procesar la ruta de la gráfica
                 imagen_path = os.path.join(dir_static, 'grafica_gaussSeidel.png')
@@ -158,7 +174,7 @@ def jacobi():
                 return render_template(
                     'Seccion_2/resultado_jacobi.html',
                     r=r, N=N, xn=xn, E=E, Re=Re, length=length, data=data,
-                    imagen_path=imagen_path
+                    imagen_path=imagen_path, tol=tol
                 )
 
             except matlab.engine.MatlabExecutionError as matlab_error:
@@ -335,21 +351,26 @@ def informe():
                     df = pd.read_csv(tabla_path)
                     size = df.shape[1] - 5
                     data = df.astype(str).to_dict(orient='records')
-
-                    if 'Triunfa' not in df['Result'].tolist():
-                        data_iter = 0
-                        data_error = 0
-                    else:
-                
-                        min_error = df.sort_values(by='Error').iloc[0]['Error']
-                        min_iter  = df.sort_values(by='Iteration').iloc[0]['Iteration']
-
-                        data_iter = df[df['Iteration']==min_iter].drop(['RE', 'Result'], axis=1).astype(str).to_dict(orient='records')
-                        data_error = df[df['Error']==min_error].drop(['RE', 'Result'], axis=1).astype(str).to_dict(orient='records')
-                else:
-                    data = []
                     data_iter = 0
                     data_error = 0
+                    
+                    if 'Triunfa' in df['Result'].tolist():
+                        min_error = df[df['Result'].str.contains('Triunfa')].sort_values(by='Error').iloc[0]['Error']
+                        min_iter  = df[df['Result'].str.contains('Triunfa')].sort_values(by='Iteration').iloc[0]['Iteration']
+
+                        #Diccionario de métodos con menor iteraciones y menor error
+                        data_iter = df[(df['Iteration']==min_iter)].drop(['RE', 'Result'], axis=1).astype(str).to_dict(orient='records')
+                        data_error = df[(df['Error']==min_error)].drop(['RE', 'Result'], axis=1).astype(str).to_dict(orient='records')
+                        
+                    if len(data_iter)==0:
+                        data_iter = 0
+                    if len(data_error)==0:
+                        data_error = 0
+                     
+                        
+                else:
+                    data = []
+                    
                     size = 0
                 x_vars = [f"x{i}" for i in range(1, size+1)]
                 # Renderizar resultados

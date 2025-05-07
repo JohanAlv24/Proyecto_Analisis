@@ -12,22 +12,26 @@
     {% block content %}
     <h1>Resultado de Gauss-Seidel</h1>
     <p>{{r}}</p>
-    {% if length != 0 %}
+    {% if data %}
       <div class="table-container">
       <table border="1">
         <thead>
           <tr>
             <th>N</th>
-            <th>xn</th>
-            <th>E</th>
+            {% for key in data[0].keys() if key.startswith('x') %}
+              <th>{{ key }}</th>
+            {% endfor %}
+            <th>Error</th>
           </tr>
         </thead>
         <tbody>
-          {% for i in range(length) %}
+          {% for row in data %}
             <tr>
-                <td>{{ N[i] }}</td>
-                <td>{{ xn[i] }}</td>
-                <td>{{ E[i] }}</td>
+                <td>{{ row.N }}</td>
+                {% for key in row.keys() if key.startswith('x') %}
+                  <td>{{ row[key] }}</td>
+                {% endfor %}
+                <td>{{ row.E }}</td>
             </tr>
           {% endfor %}
         </tbody>
@@ -35,24 +39,23 @@
       <br>
       <form action="gaussSeidel/descargar" method="post">
         <button type="submit">Descargar</button>
-    </form>
-    </div>
-    
-    {% if c < niter %}
-      <div class="result-container">
-        <h1>Solución Sistema de Ecuaciones Ax=b</h1>
-        <div class="image-container">
-          <div class="row mt-4">
-            <div class="col-md 6">
-                <img src="{{ imagen_path }}" alt="Imagen">
+      </form>
+      </div>
+      
+      {% if c < niter %}
+        <div class="result-container">
+          <h1>Solución Sistema de Ecuaciones Ax=b</h1>
+          <div class="image-container">
+            <div class="row mt-4">
+              <div class="col-md 6">
+                  <img src="{{ imagen_path }}" alt="Imagen">
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    {% endif %}
-    <p>{{Re}}</p>
-  {% endif %}     
-  {% endblock %}
-   
+      {% endif %}
+      <p>{{Re}}</p>
+    {% endif %}     
+    {% endblock %}
 </body>
 </html>
