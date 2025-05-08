@@ -16,8 +16,9 @@
             {% for val in xn[-1] %}
             {{ val }}{% if not loop.last %}, {% endif %}
             {% endfor %}
+            Es una aproximación de la solución del sistema con una tolerancia= {{ tol }}
             {% endif %}
-            {{ r }}
+            
         </p>
         {%if length != 0%}
         <div class="table-container">

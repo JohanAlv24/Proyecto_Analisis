@@ -1,4 +1,4 @@
-function [xi, errores, resultado] = multiple_roots(fn_str, xi, tol, k, et)
+function [resultado, n, xi, fxi, errores] = raices_multiples(fn_str, xi, tol, k, et)
     % Validar el tipo de error
     if ~ismember(et, {'Decimales Correctos', 'Cifras Significativas'})
         error('El tipo de error no es valido');
