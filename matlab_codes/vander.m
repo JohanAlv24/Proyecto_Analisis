@@ -1,4 +1,4 @@
-function [pol] = vandermonde(vectorx, vectory)
+function [pol] = vander(vectorx, vectory)
     % Asignar los vectores de entrada
     xv = vectorx;
     yv = vectory;

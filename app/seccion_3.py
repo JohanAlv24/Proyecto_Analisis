@@ -173,3 +173,33 @@ def descargar_archivoSpline():
 
     # Enviar el archivo al cliente para descargar
     return send_file(archivo_path, as_attachment=True)
+
+
+@blueprint.route('/informe3', methods=['POST', 'GET'])
+def informe3():
+    if request.method == 'POST':
+    
+        x = json.loads(request.form['vectorx'])
+        y = json.loads(request.form['vectory'])
+        
+        eng.addpath(dir_matlab)
+        
+        matx = matlab.double(x)
+        maty = matlab.double(y)
+        
+        respuesta = eng.lagrange(matx, maty)
+        print("respuesta",respuesta)
+
+        df = pd.read_csv(os.path.join(dir_tables,'tabla_lagrange.csv'))
+        polinomio = df['Polinomio'][0]
+        
+        data = df.to_dict(orient='records')
+        #print("data",data)
+
+        df.to_excel(os.path.join(dir_tables,'tabla_informe3.xlsx'), index=False)
+
+        # Gráfica
+        imagen_path = os.path.join('static','grafica_lagrange.png')  # Ruta de la imagen
+        return render_template('Seccion_3/resultado_lagrange.html',respuesta=polinomio, data=data, imagen_path=imagen_path)
+        
+    return render_template('Seccion_3/informe3.html')
