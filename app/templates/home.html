@@ -1,86 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Bienvenido a Analisis Numerico{% endblock %}</title>
+    <title>{% block title %}Análisis Numérico{% endblock %}</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/home.css') }}">
     <style>
-        .forms-container {
-            display: flex;
-            flex-direction: column; /* Cambia la disposición a columnas */
-            align-items: center; /* Centra los elementos horizontalmente */
-            gap: 10px; /* Espacio entre formularios */
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --accent-color: #e74c3c;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: var(--dark-color);
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .intro-text {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+            color: #555;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .sections-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .section-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section-header {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 15px 20px;
+            font-size: 1.3rem;
+            font-weight: 500;
+        }
+        
+        .section-description {
+            padding: 15px 20px;
+            color: #555;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .methods-container {
+            padding: 15px 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        
+        .method-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            text-align: center;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .method-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .section-card:nth-child(2) .method-btn {
+            background-color: var(--secondary-color);
+        }
+        
+        .section-card:nth-child(2) .method-btn:hover {
+            background-color: #27ae60;
+        }
+        
+        .section-card:nth-child(3) .method-btn {
+            background-color: var(--accent-color);
+        }
+        
+        .section-card:nth-child(3) .method-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .info-section {
+            margin-top: 50px;
+            background-color: var(--dark-color);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .sections-container {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 
 {% extends "base.html" %}
 {% block content %}
-    <h1>Bienvenido a Análisis Numérico</h1>
-    <p>Por favor, seleccione una opción:</p>
+<div class="container">
+    <h1>Herramientas de Análisis Numérico</h1>
+    <p class="intro-text">Seleccione un método numérico para resolver problemas matemáticos complejos con precisión y eficiencia.</p>
     
-    <section id="seccion1">
-        <h2>Sección 1:</h2>
-        <p>Solución de ecuaciones de una variable</p>
-        <div class="forms-container">
-            <form action="/punto_fijo" method="GET">
-                <button type="submit">Punto Fijo</button>
-            </form>
-            <form action="/biseccion" method="GET">
-                <button type="submit">Bisección</button>
-            </form>
-            <form action="/multiple_roots" method="GET">
-                <button type="submit">Raíces Múltiples</button>
-            </form>
-            <form action="/rf" method="GET">
-                <button type="submit">Regla Falsa</button>
-            </form>
-            <form action="/secante" method="GET">
-                <button type="submit">Secante</button>
-            </form>
-            <form action="/newton" method="GET">
-                <button type="submit">Newton</button>
-            </form>
-            <form action="/informe" method="GET">
-                <button type="submit">Informe</button>
-            </form>
+    <div class="sections-container">
+        <!-- Sección 1 -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2>Ecuaciones de una variable</h2>
+            </div>
+            <div class="section-description">
+                <p>Métodos para encontrar raíces de ecuaciones no lineales</p>
+            </div>
+            <div class="methods-container">
+                <form action="/punto_fijo" method="GET">
+                    <button type="submit" class="method-btn">Punto Fijo</button>
+                </form>
+                <form action="/biseccion" method="GET">
+                    <button type="submit" class="method-btn">Bisección</button>
+                </form>
+                <form action="/multiple_roots" method="GET">
+                    <button type="submit" class="method-btn">Raíces Múltiples</button>
+                </form>
+                <form action="/rf" method="GET">
+                    <button type="submit" class="method-btn">Regla Falsa</button>
+                </form>
+                <form action="/secante" method="GET">
+                    <button type="submit" class="method-btn">Secante</button>
+                </form>
+                <form action="/newton" method="GET">
+                    <button type="submit" class="method-btn">Newton</button>
+                </form>
+                <form action="/informe" method="GET">
+                    <button type="submit" class="method-btn">Informe</button>
+                </form>
+            </div>
         </div>
-    </section>
-
-    <section id="seccion2">
-        <h2>Sección 2:</h2>
-        <p>Solución de sistemas de ecuaciones</p>
-        <div class="forms-container">
-            <form action="/gaussSeidel" method="GET">
-                <button type="submit">Gauss-Seidel</button>
-            </form>
-            <form action="/jacobi" method="GET">
-                <button type="submit">Jacobi</button>
-            </form>
-            <form action="/sor" method="GET">
-                <button type="submit">SOR</button>
-            </form>
-            <form action="/informe2" method="GET">
-                <button type="submit">Informe</button>
-            </form>
+        
+        <!-- Sección 2 -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2>Sistemas de ecuaciones</h2>
+            </div>
+            <div class="section-description">
+                <p>Métodos iterativos para sistemas lineales</p>
+            </div>
+            <div class="methods-container">
+                <form action="/gaussSeidel" method="GET">
+                    <button type="submit" class="method-btn">Gauss-Seidel</button>
+                </form>
+                <form action="/jacobi" method="GET">
+                    <button type="submit" class="method-btn">Jacobi</button>
+                </form>
+                <form action="/sor" method="GET">
+                    <button type="submit" class="method-btn">SOR</button>
+                </form>
+                <form action="/informe2" method="GET">
+                    <button type="submit" class="method-btn">Informe</button>
+                </form>
+            </div>
         </div>
-    </section>
-
-    <section id="seccion3">
-        <h2>Sección 3:</h2>
-        <p>Interpolación</p>
-        <div class="forms-container">
-            <form action="/lagrange" method="GET">
-                <button type="submit">Lagrange</button>
-            </form>
-            <form action="/newtonint" method="GET">
-                <button type="submit">Newton Interpolación</button>
-            </form>
-            <form action="/vandermonde" method="GET">
-                <button type="submit">Vandermonde</button>
-            </form>
-            <form action="/spline" method="GET">
-                <button type="submit">Spline</button>
-            </form>
+        
+        <!-- Sección 3 -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2>Interpolación</h2>
+            </div>
+            <div class="section-description">
+                <p>Métodos para aproximación de funciones</p>
+            </div>
+            <div class="methods-container">
+                <form action="/lagrange" method="GET">
+                    <button type="submit" class="method-btn">Lagrange</button>
+                </form>
+                <form action="/newtonint" method="GET">
+                    <button type="submit" class="method-btn">Newton</button>
+                </form>
+                <form action="/vandermonde" method="GET">
+                    <button type="submit" class="method-btn">Vandermonde</button>
+                </form>
+                <form action="/spline" method="GET">
+                    <button type="submit" class="method-btn">Spline</button>
+                </form>
+            </div>
         </div>
-    </section>
+    </div>
+    
+    <div class="info-section">
+        <h3>¿Necesitas ayuda?</h3>
+        <p>Consulta nuestra documentación.</p>
+        <form action="/ayuda" method="GET" style="margin-top: 15px;">
+            <button type="submit" class="method-btn" style="background-color: white; color: var(--dark-color);">Ir a Ayuda</button>
+        </form>
+    </div>
+</div>
 {% endblock %}
