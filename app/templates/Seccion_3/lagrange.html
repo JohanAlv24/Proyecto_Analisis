@@ -75,15 +75,17 @@
 
                 // Limpiar la tabla
                 tabla.innerHTML = '';
+                tabla.align = "center"; 
                 var fila = tabla.insertRow(0);
                 for (var j = 0; j < filas; j++) {
                     var celda = fila.insertCell(j);
                     var input = document.createElement("input");
                     input.type = "number";
                     input.name = "dato[" + j + "]";
+                    input.style.width = "80px";
+                    input.style.textAlign = "center";
                     celda.appendChild(input);
                 }
-
             }
 
             function generarVectory() {
@@ -92,12 +94,15 @@
 
                 // Limpiar la tabla
                 tabla.innerHTML = '';
+                tabla.align = "center"; 
                 var fila = tabla.insertRow(0);
                 for (var j = 0; j < filas; j++) {
                     var celda = fila.insertCell(j);
                     var input = document.createElement("input");
                     input.type = "number";
                     input.name = "dato[" + j + "]";
+                    input.style.width = "80px";
+                    input.style.textAlign = "center";
                     celda.appendChild(input);
                 }
             }
