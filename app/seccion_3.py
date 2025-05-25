@@ -3,6 +3,8 @@ import os, json, csv
 import matlab.engine
 import pandas as pd
 import numpy as np
+from fractions import Fraction
+
 
 blueprint = Blueprint('seccion_3', __name__)
 
@@ -173,3 +175,56 @@ def descargar_archivoSpline():
 
     # Enviar el archivo al cliente para descargar
     return send_file(archivo_path, as_attachment=True)
+
+
+@blueprint.route('/informe3', methods=['POST', 'GET'])
+def informe3():
+    if request.method == 'POST':
+    
+        x = json.loads(request.form['x'])
+        y = json.loads(request.form['y'])
+
+        x_comp, y_comp = x[-1], y[-1]
+        pares = list(zip(x, y))   
+
+        pares_ordenados = sorted(pares, key=lambda par: par[0])
+
+        x_ordenado, y_ordenado = zip(*pares_ordenados)
+        
+        x = list(x_ordenado)
+        y = list(y_ordenado)
+        x.append(x_comp)
+        y.append(y_comp)
+        
+        eng.addpath(dir_matlab)
+        
+        x = matlab.double(x)
+        y = matlab.double(y)
+        
+        [polinomios, errores] = eng.Informe3(x, y, nargout=2)
+        polinomios = polinomios.tolist()
+        errores = errores.tolist()
+        errores = errores[0]
+        
+        etiquetas = ["Lagrange", "Newton", "Vandermonde"]
+
+        polinomios = [
+            [Fraction(c).limit_denominator() for c in pol]
+            for pol in polinomios
+        ]
+    
+        polinomios = dict(zip(etiquetas, polinomios))
+
+        df1 = pd.read_csv(os.path.join(dir_tables,'tabla_spline1.csv'))
+        df1 = df1.astype(str)
+        data1 = df1.to_dict(orient='records')
+
+        df3 = pd.read_csv(os.path.join(dir_tables,'tabla_spline3.csv'))
+        df3 = df3.astype(str)
+        data3 = df3.to_dict(orient='records')
+        
+
+        # Gráfica
+        return render_template('Seccion_3/resultado_informe3.html', data1=data1, data3=data3, polinomios=polinomios, errores=errores)
+
+    return render_template('Seccion_3/informe3.html')

@@ -4,6 +4,11 @@
 function [Tabla] = spline(x,y,d)
     x = eval(x);
     y = eval(y);
+
+    % Ordenar x y reorganizar y según ese orden
+    [x, idx] = sort(x);
+    y = y(idx);
+
     n=length(x);
     A=zeros((d+1)*(n-1));
     b=zeros((d+1)*(n-1),1);
@@ -127,9 +132,13 @@ function [Tabla] = spline(x,y,d)
 
     val = A\b; % Cambiado a `\` para mayor estabilidad numérica
     Tabla = reshape(val, d+1, n-1)';
-
+    
     % Exportar la tabla a un archivo CSV
-    csv_file_path = "app/tables/tabla_spline.csv";
+    currentDir = fileparts(mfilename('fullpath'));
+    tablesDir = fullfile(currentDir, '..', 'app', 'tables');
+    mkdir(tablesDir);
+    cd(tablesDir);
+    csv_file_path = fullfile(tablesDir, 'tabla_spline.csv');
     writematrix(Tabla, csv_file_path);
 
     % Graficar los resultados
@@ -151,8 +160,13 @@ function [Tabla] = spline(x,y,d)
     title('Interpolación Spline');
     xlabel('x');
     ylabel('y');
+
     img = getframe(gcf);
-    imwrite(img.cdata, 'app/static/grafica_spline.png');
+    staticDir = fullfile(currentDir, '..', 'app', 'static');
+    mkdir(staticDir);
+    imgPath = fullfile(staticDir, 'grafica_spline.png');
+    imwrite(img.cdata, imgPath);
+
     hold off
     close(fig);
 end

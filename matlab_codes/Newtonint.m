@@ -1,4 +1,4 @@
-function [Tabla] = Newtonint(x, y)
+function [Tabla, pol] = Newtonint(x, y)
     format long
     
     % Convertir x e y a matrices numéricas

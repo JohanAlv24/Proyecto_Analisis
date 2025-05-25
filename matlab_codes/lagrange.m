@@ -17,8 +17,13 @@ function [pol] = lagrange(vectorx, vectory)
     end
     pol = sum(Tabla);
 
-    % Convertir el polinomio a una cadena de texto
-    polinomio_str = sprintf('%f ', pol);  % Crear una cadena con coeficientes
+    % Convertir el polinomio a una expresión simbólica
+    syms x
+    pol_expr = poly2sym(pol, x);  %  Esto crea el polinomio simbólico
+
+    % Convertirlo a cadena de texto
+    polinomio_str = char(expand(pol_expr));  % Esto lo convierte a texto legible
+
 
     % Guardar el polinomio en un archivo CSV
     tabla = table({polinomio_str}, 'VariableNames', {'Polinomio'});

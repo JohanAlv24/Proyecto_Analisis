@@ -196,7 +196,8 @@
       /><circle r="5" style="stroke:none;" cx="0" transform="translate(18.5596,26.6479)" cy="0"
       /><circle r="5" style="stroke:none;" cx="0" transform="translate(18.8247,27.0173)" cy="0"
       /><circle r="5" style="stroke:none;" cx="0" transform="translate(18.6921,26.8327)" cy="0"
-      /><circle transform="translate(18.6921,26.8327)" style="fill:lime; stroke:none;" r="5" cx="0" cy="0"
+      /><circle r="5" style="stroke:none;" cx="0" transform="translate(18.6259,26.7403)" cy="0"
+      /><circle transform="translate(18.6259,26.7403)" style="fill:lime; stroke:none;" r="5" cx="0" cy="0"
     /></g
     ><g style="fill-opacity:0.702; color-rendering:optimizeQuality; color-interpolation:linearRGB; text-rendering:geometricPrecision; stroke:rgb(0,0,0); stroke-linecap:butt; stroke-miterlimit:1; stroke-opacity:0.702; fill:rgb(0,0,0); stroke-dasharray:10,6; stroke-width:0.8333; stroke-linejoin:bevel; image-rendering:optimizeQuality;"
     ><line y2="253" style="fill:none;" x1="91" x2="634" y1="253"

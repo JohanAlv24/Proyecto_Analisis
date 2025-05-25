@@ -29,8 +29,8 @@ function [r, N, xn, fm, E] = biseccion(f_str, xi, xs, Tol, niter, tipe)
         N_list(1) = N;
         xn_list(1) = xm;
         E(1) = Tol + 1;
-        error = E(1);
-        while error > Tol && fe ~= 0 && N < niter
+        err = E(1);
+        while err > Tol && fe ~= 0 && N < niter
             if fi * fe < 0
                 xs = xm;
                 fs = f(xs);
@@ -50,20 +50,22 @@ function [r, N, xn, fm, E] = biseccion(f_str, xi, xs, Tol, niter, tipe)
             else
                 E(N + 1) = abs(xm - xa);
             end
-            error = E(N + 1);
+            err = E(N + 1);
         end
         if fe == 0
             xn = xm;
             r = sprintf('%f es raíz de f(x)', xm);
-        elseif error < Tol
+        elseif err < Tol
             xn = xm;
             r = sprintf('%f es una aproximación de una raíz de f(x) con una tolerancia = %f', xm, Tol);
         else
             xn = xm;
             r = sprintf('Fracasó en %d iteraciones', niter);
         end
+    elseif fs * fi > 0
+        error('Biseccion:IntervaloInvalido', ...
+        'fs * fi > 0')
     else
-        r = sprintf('El intervalo es inadecuado');
         N_list = [];
         xn_list = [];
         fm = [];
@@ -115,7 +117,7 @@ function [r, N, xn, fm, E] = biseccion(f_str, xi, xs, Tol, niter, tipe)
         if ~exist(staticDir, 'dir')
             mkdir(staticDir);
         end
-        svgPath = fullfile(staticDir, [ safe_f_str, '.svg']);
+        svgPath = fullfile(staticDir, ['biseccion.svg']);
         saveas(fig, svgPath, 'svg');
 
         disp(['Gráfica SVG generada en: ', svgPath]);

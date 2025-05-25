@@ -10,7 +10,7 @@
 
 <body>
     {% block content %}
-        <h1>Resultado de Informe Comparativo Solución Sistema de Ecuaciones</h1>
+        <h1>Resultado de Informe Comparativo Solución Ecuaciones no Lineales</h1>
 
         {%if length != 0%}
         <div class="table-container">
@@ -20,12 +20,13 @@
                     <th>Método</th>
                     <th>Iteración</th>
                     <th>Error</th>
-                    <th>Radio Espectral</th>
+                    <th>X1</th>
+                    <th>fX1</th>
                     <th>Resultado</th>
                     
-                    {% for x in x_vars %}
+                    <!-- {% for x in x_vars %}
                         <th>{{ x }}</th>
-                    {% endfor %}
+                    {% endfor %}-->
                     
 
                 </tr>
@@ -36,12 +37,13 @@
                     <td>{{ row.Method }}</td>
                     <td>{{ row.Iteration }}</td>
                     <td>{{ row.Error }}</td>
-                    <td>{{ row.RE }}</td>
-                    <td>{{ row.Result }}</td>
+                    <td>{{ row.X1 }}</td>
+                    <td>{{ row.fX1 }}</td>
+                    <td>{{ row.Respuesta }}</td>
                     
-                    {% for x in x_vars %}
+                    <!--{% for x in x_vars %}
                         <td>{{ row[x] }}</td>
-                    {% endfor %}
+                    {% endfor %}-->
                 </tr>
                 {% endfor %}
             </tbody>

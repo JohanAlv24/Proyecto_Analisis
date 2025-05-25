@@ -13,10 +13,10 @@ function [r, N, xn, fm, E] = pf(f_str, g_str, x0, Tol, niter, tipe)
     fm(c + 1) = f(x0);
     fe = fm(c + 1);
     E(c + 1) = Tol + 1;
-    error = E(c + 1);
+    err = E(c + 1);
     N(c + 1) = c;
 
-    while error > Tol && fe ~= 0 && c < niter
+    while err > Tol && fe ~= 0 && c < niter
         xn(c + 2) = g(x0);
         fm(c + 2) = f(xn(c + 2));
         fe = fm(c + 2);
@@ -27,7 +27,7 @@ function [r, N, xn, fm, E] = pf(f_str, g_str, x0, Tol, niter, tipe)
             E(c + 2) = abs(xn(c + 2) - x0);
         end
 
-        error = E(c + 2);
+        err = E(c + 2);
         x0 = xn(c + 2);
         N(c + 2) = c + 1;
         c = c + 1;
@@ -39,12 +39,13 @@ function [r, N, xn, fm, E] = pf(f_str, g_str, x0, Tol, niter, tipe)
     fm = fm(1:c + 1);
     E = E(1:c + 1);
 
-    if fe == 0
+    if fe == 0 && f ~= "inf"
         r = sprintf('%f es raíz de f(x)\n', x0);
-    elseif error < Tol
+    elseif err < Tol
         r = sprintf('%f es una aproximación de una raíz de f(x) con una tolerancia= %f\n', x0, Tol);
     else
-        r = sprintf('Fracasó en %f iteraciones\n', niter);
+        error('PuntoFijo:FuncionInvalida', ...
+        'La función g(x) no garantiza convergencia (∣g´(x)∣>=1)');
     end
 
     % Guardar los resultados en un archivo CSV
@@ -82,7 +83,7 @@ function [r, N, xn, fm, E] = pf(f_str, g_str, x0, Tol, niter, tipe)
     if ~exist(staticDir, 'dir')
         mkdir(staticDir);
     end
-    svgPath = fullfile(staticDir, ['grafica_' safe_f_str '.svg']);
+    svgPath = fullfile(staticDir, ['pf.svg']);
     saveas(fig, svgPath, 'svg'); % Guardar como SVG
     disp(['Gráfica SVG generada en: ', svgPath]);
 

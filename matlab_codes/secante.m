@@ -2,7 +2,10 @@ function [respuesta, N, XN, fm, E] = secante(func, x0, x1, Tol, niter, Terror)
     % Convertir la función de entrada a un handle de función
     f = str2func(['@(x)', func]);
     c = 0;
-
+    if x0 == x1
+        error('Secante:ValoresInvalidos', ...
+        'Los valores x0 y x1 deben ser distintos');
+    end
     % Inicializar vectores
     fm = zeros(1, niter + 1);
     E = zeros(1, niter + 1);
@@ -98,7 +101,8 @@ function [respuesta, N, XN, fm, E] = secante(func, x0, x1, Tol, niter, Terror)
     if ~exist(staticDir, 'dir')
         mkdir(staticDir);
     end
-    svgPath = fullfile(staticDir, [safe_func_name, '.svg']);
+    svgPath = fullfile(staticDir, ['secante.svg']);
     saveas(fig, svgPath, 'svg');
     close(fig);
+    
 end

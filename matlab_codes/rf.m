@@ -1,4 +1,4 @@
-function [respuesta] = ReglaFalsa(func, x0, x1, Tol, niter, Terror)
+function [respuesta, c, x1_rf, f_rf, E_rf] = ReglaFalsa(func, x0, x1, Tol, niter, Terror)
     % Convertir la función de entrada a un handle de función
     f = str2func(['@(x)', func]);
 
@@ -23,7 +23,8 @@ function [respuesta] = ReglaFalsa(func, x0, x1, Tol, niter, Terror)
         respuesta = sprintf('El límite superior %f es raíz de f(x)', xs(c));
         return;
     elseif fi(c) * fs(c) > 0
-        respuesta = 'El intervalo proporcionado no es adecuado.';
+        error('ReglaFalsa:IntervaloInvalido', ...
+        'El intervalo es inadecuado: f(x0) * f(x1) >= 0');
         return;
     end
 
@@ -70,7 +71,9 @@ function [respuesta] = ReglaFalsa(func, x0, x1, Tol, niter, Terror)
     else
         respuesta = sprintf('Fracasó en %d iteraciones', niter);
     end
-
+    x1_rf = xm;
+    f_rf = fm;
+    E_rf = E;
     % Crear tabla de resultados
     T = table((1:c)', xm', xi', xs', fm', fi', fs', E', ...
         'VariableNames', ["n", "x_m", "x_i", "x_s", "f_m", "f_i", "f_s", "E"]);
@@ -102,7 +105,7 @@ function [respuesta] = ReglaFalsa(func, x0, x1, Tol, niter, Terror)
     if ~exist(staticDir, 'dir')
         mkdir(staticDir);
     end
-    svgPath = fullfile(staticDir, [safe_func, '.svg']);
+    svgPath = fullfile(staticDir, ['rf.svg']);
     saveas(fig, svgPath, 'svg');
     disp(['Gráfica SVG generada en: ', svgPath]);
     close(fig);

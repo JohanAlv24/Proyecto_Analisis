@@ -64,7 +64,7 @@ def punto_fijo():
                 )
 
         except ValueError:
-            return render_template(
+            return render_template('Seccion_1/formulario_pf.html',
                 error_message="Error en los datos ingresados. Por favor verifica los valores."
             )
         except Exception as e:
@@ -176,7 +176,7 @@ def multiple_roots():
 
             try:
                 # Llamar a MATLAB
-                [xi, errores, resultado] = eng.raices_multiples(fn, xi, tol, k, et, nargout=3)
+                [resultado, N_rm, xi, fxi_rm, errores] = eng.raices_multiples(fn, xi, tol, k, et, nargout=5)
 
                 # Leer resultados del archivo CSV
                 df = pd.read_csv(os.path.join(dir_tables, 'multiple_roots_results.csv'))
@@ -234,7 +234,7 @@ def secante():
 
             try:
                 # Llamar a la función de MATLAB
-                respuesta = eng.secante(f, x0, x1, tol, niter, Terror)
+                [respuesta, N_sec, XN_sec, fm_sec, E_sec] = eng.secante(f, x0, x1, tol, niter, Terror, nargout = 5)
 
                 # Leer el archivo CSV exportado
                 csv_path = os.path.join(dir_tables, 'tabla_secante.csv')
@@ -304,7 +304,7 @@ def reglaFalsa():
 
             try:
                 # Llamar a la función de MATLAB
-                respuesta = eng.rf(f, x0, x1, tol, niter, Terror)
+                [respuesta, c_rf, x1_rf, f_rf, E_rf] = eng.rf(f, x0, x1, tol, niter, Terror, nargout = 5)
 
                 # Leer el archivo CSV exportado
                 csv_path = os.path.join(dir_tables, 'tabla_reglaFalsa.csv')
@@ -558,25 +558,26 @@ def informe():
 
             try:
                 # Intentar ejecutar MATLAB
-                [r, N, xn, fm, E] = eng.Informe1(f, g, x0, x1, xi, xs, tol, niter, tipe, nargout=9)
+                [r, methods, E, xn, fm, iter] = eng.Informe1(f, g, x0, x1, xi, xs, tol, niter, tipe, nargout=6)
                 N, xn, fm, E = list(N[0]), list(xn[0]), list(fm[0]), list(E[0])
                 length = len(N)
                 
                 # Leer la tabla generada por MATLAB
-                df = pd.read_csv(os.path.join(dir_tables, 'tabla_Informe1.csv'))
+                df = pd.read_csv(os.path.join(dir_tables, 'tabla_informe1.csv'))
                 df = df.astype(str)
                 data = df.to_dict(orient='records')
-                df.to_excel(os.path.join(dir_tables, 'tabla_Informe1.xlsx'), index=False)
+                df.to_excel(os.path.join(dir_tables, 'tabla_informe1.xlsx'), index=False)
+
 
                 return render_template(
-                    'Seccion_1/resultado_Informe1.html',
+                    'Seccion_1/resultado_informe1.html',
                     r=r, N=N, xn=xn, fm=fm, E=E,
                     length=length, data=data, f=f
                 )
             except matlab.engine.MatlabExecutionError as matlab_error:
                 # Capturar errores específicos de MATLAB
                 return render_template(
-                    'Seccion_1/formulario_informe.html',
+                    'Seccion_1/formulario_informe1.html',
                     error_message=f"Error en MATLAB: {str(matlab_error)}"
                 )
 
@@ -586,9 +587,9 @@ def informe():
             )
         except Exception as e:
             return render_template(
-                'Seccion_1/formulario_informe.html',
+                'Seccion_1/formulario_informe1.html',
                 error_message=f"Error en la sintaxis, para mas informacion ir al apartado de ayuda"
             )
 
     # Si es una solicitud GET, renderiza el formulario vacío
-    return render_template('Seccion_1/formulario_informe.html')
+    return render_template('Seccion_1/formulario_informe1.html')
