@@ -1,6 +1,4 @@
-function [error_lagrange, error_newton, error_vander, val1, val3] = Informe3(x,y)
-    x = x;
-    y = y;
+function [tabla1, pol_int, Errores] = Informe3(x,y)
     x_comp = x(end);
     y_comp = y(end);
 
@@ -21,9 +19,9 @@ function [error_lagrange, error_newton, error_vander, val1, val3] = Informe3(x,y
         f_vander = f_vander + x_comp^(n-i)*pol_vander(i);
     end
     
-    error_lagrange = f_lagrange - y_comp;
-    error_newton = f_newton - y_comp;
-    error_vander = f_vander - y_comp;
+    error_lagrange = abs(f_lagrange - y_comp);
+    error_newton = abs(f_newton - y_comp);
+    error_vander = abs(f_vander - y_comp);
 
     A1=zeros((2)*(n-1));
     b1=zeros((2)*(n-1),1);
@@ -110,11 +108,66 @@ function [error_lagrange, error_newton, error_vander, val1, val3] = Informe3(x,y
     A3(h,c+1)=2;
     b3(h)=0;
 
-    val1 = reshape(A1\b1, 2, n-1)';
-    val3 = reshape(A3\b3, 4, n-1)';
+    tabla1 = reshape(A1\b1, 2, n-1)';
+    tabla3 = reshape(A3\b3, 4, n-1)';
     
-    f_spline1 = 0;
-    f_spline2 = 0;
+    figure;
+    hold on;
+    plot(x, y, 'ro', 'MarkerFaceColor', 'r'); % Puntos originales
+    
+    for i = 1:n-1
+        xx = linspace(x(i), x(i+1), 100);
+        yy = tabla1(i,1)*xx + tabla1(i,2);
+        plot(xx, yy, 'b-');
+    end
+    title('Interpolación Spline Lineal');
+    xlabel('x');
+    ylabel('y');
+    hold off
 
+    figure;
+    hold on;
+    plot(x, y, 'ro', 'MarkerFaceColor', 'r'); % Puntos originales
+    for i = 1:n-1
+        xx = linspace(x(i), x(i+1), 100);
+        yy = tabla3(i,1)*xx.^3 + tabla3(i,2)*xx.^2 + tabla3(i,3)*xx + tabla3(i,4);
+        plot(xx, yy, 'b-');
+    end
+    title('Interpolación Spline Cúbico');
+    xlabel('x');
+    ylabel('y');
+    hold off
 
+    pos = 0;
+    if x_comp >= x(end)
+        pos = n-1;
+    else
+        for i = (1:n-1)
+            if x_comp <= x(i+1) && x_comp >= x(i)
+                pos = i;
+                break;
+            end
+        end
+    end
+    
+    f_spline1 = tabla1(pos, 1)*x_comp + tabla1(pos, 2);
+    f_spline3 = tabla3(pos, 1)*x_comp^3 + tabla3(pos, 2)*x_comp^2 + tabla3(pos, 3)*x_comp + tabla3(pos, 4);
+    
+    error_spline1 = abs(f_spline1 - y_comp);
+    error_spline3 = abs(f_spline3 - y_comp);
+    
+    pol_int = [pol_lagrange, pol_Newton, pol_vander];
+    Errores = [error_lagrange, error_newton, error_vander, error_spline1, error_spline3];
+
+    output_dir = "app/tables";
+    if ~exist(output_dir, 'dir')
+        mkdir(output_dir);
+    end
+    
+    % Guardar los archivos CSV
+    csv_file_path1 = fullfile(output_dir, "tabla_spline1.csv");
+    csv_file_path3 = fullfile(output_dir, "tabla_spline3.csv");
+    
+    writematrix(tabla1, csv_file_path1);
+    writematrix(tabla3, csv_file_path3);
 end
