@@ -1,4 +1,4 @@
-function [respuesta, c, x1_rf, f_rf, E_rf] = ReglaFalsa(func, x0, x1, Tol, niter, Terror)
+function [respuesta, c, x1_rf, f_rf, E_rf] = rf(func, x0, x1, Tol, niter, Terror)
     % Convertir la función de entrada a un handle de función
     f = str2func(['@(x)', func]);
 
@@ -15,15 +15,27 @@ function [respuesta, c, x1_rf, f_rf, E_rf] = ReglaFalsa(func, x0, x1, Tol, niter
         fm(c) = f(xm(c));
         E(c) = 0;
         respuesta = sprintf('El límite inferior %f es raíz de f(x)', xi(c));
+        x1_rf = xm;
+        f_rf = fm;
+        E_rf = E;
         return;
     elseif fs(c) == 0
         xm(c) = xs(c);
         fm(c) = f(xm(c));
         E(c) = 0;
         respuesta = sprintf('El límite superior %f es raíz de f(x)', xs(c));
+        x1_rf = xm;
+        f_rf = fm;
+        E_rf = E;
         return;
     elseif fi(c) * fs(c) > 0
         respuesta = 'El intervalo proporcionado no es adecuado.';
+        xm = NaN;
+        fm = NaN;
+        E = NaN;
+        x1_rf = xm;
+        f_rf = fm;
+        E_rf = E;
         return;
     end
 

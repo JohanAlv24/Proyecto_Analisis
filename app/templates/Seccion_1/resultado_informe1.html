@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resultados Informe Comparativo</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/resultado_2.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/resultado_1.css') }}">
 </head>
 {% extends "base.html" %}
 
 <body>
     {% block content %}
-        <h1>Resultado de Informe Comparativo Solución Ecuaciones no Lineales</h1>
+        <h1>Resultado de Informe Comparativo Solución Númerica de Ecuaciones</h1>
 
         {%if length != 0%}
         <div class="table-container">
@@ -20,13 +20,10 @@
                     <th>Método</th>
                     <th>Iteración</th>
                     <th>Error</th>
-                    <th>X1</th>
-                    <th>fX1</th>
+                    <th>x1</th>
+                    <th>fx1</th>
                     <th>Resultado</th>
                     
-                    <!-- {% for x in x_vars %}
-                        <th>{{ x }}</th>
-                    {% endfor %}-->
                     
 
                 </tr>
@@ -37,19 +34,16 @@
                     <td>{{ row.Method }}</td>
                     <td>{{ row.Iteration }}</td>
                     <td>{{ row.Error }}</td>
-                    <td>{{ row.X1 }}</td>
-                    <td>{{ row.fX1 }}</td>
-                    <td>{{ row.Respuesta }}</td>
+                    <td>{{ row.x1 }}</td>
+                    <td>{{ row.fx1 }}</td>
+                    <td>{{ row.Result }}</td>
                     
-                    <!--{% for x in x_vars %}
-                        <td>{{ row[x] }}</td>
-                    {% endfor %}-->
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
         <br>
-        <form action="informe2/descargar" method="post">
+        <form action="informe1/descargar" method="post">
             <button type="submit">Descargar</button>
         </form>
     </div>

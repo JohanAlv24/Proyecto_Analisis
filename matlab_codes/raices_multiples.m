@@ -3,7 +3,7 @@ function [resultado, n, xi, fxi, errores] = raices_multiples(fn_str, xi, tol, k,
     if ~ismember(et, {'Decimales Correctos', 'Cifras Significativas'})
         error('El tipo de error no es valido');
     end
-
+    currentDir = fileparts(mfilename('fullpath'));  
     % Convertir la función de entrada a un handle numérico
     fn = str2func(['@(x)', fn_str]);
     dfn = @(x) (fn(x + 1e-6) - fn(x)) / 1e-6; % Derivada numérica
@@ -14,6 +14,19 @@ function [resultado, n, xi, fxi, errores] = raices_multiples(fn_str, xi, tol, k,
     xis = [xi]; % Inicializar con el valor inicial
     error = tol+1;
     n = 0;
+    fxi0 = fn(xi);                % Evaluamos f en la semilla
+    if fxi0 == 0
+        resultado = sprintf('%f es raíz de f(x)\n', xi);
+        n         = 0;
+        errores   = 0;            % Error cero en la aproximación inicial
+        xi        = xi;           % La raíz
+        fxi       = fxi0;         % 0
+        % Guarda CSV (opcional):
+        T = table(1, xi, fxi, errores, ...
+            'VariableNames', {'Iteración','xi','f(xi)','Error'});
+        writetable(T, fullfile(currentDir,'..','app','tables','multiple_roots_results.csv'));
+        return
+    end
 
     % Iteración principal del método
     while error > tol && n < k
@@ -71,7 +84,6 @@ function [resultado, n, xi, fxi, errores] = raices_multiples(fn_str, xi, tol, k,
     safe_fn_str = regexprep(fn_str, '[^a-zA-Z0-9]', '_');
 
     % Guardar la gráfica
-    currentDir = fileparts(mfilename('fullpath'));
     staticDir = fullfile(currentDir, '..', 'app', 'static');
     if ~exist(staticDir, 'dir')
         mkdir(staticDir);
@@ -83,8 +95,23 @@ function [resultado, n, xi, fxi, errores] = raices_multiples(fn_str, xi, tol, k,
     disp(['Gráfica SVG generada en: ', svgPath]);
 
     close(fig);
-
-
+    
+    % Al final, forzamos que 'errores' y 'xis' tengan la misma longitud:
+    nX = length(xis);
+    nE = length(errores);
+    if nE < nX
+        % faltan errores: rellenar con NaN
+        errores(end+1:nX) = NaN;
+    elseif nE > nX
+        % hay demasiados errores: simplemente recortarlos
+        errores = errores(1:nX);
+    end
+    
+    % Ahora construyes el vector fxis sin riesgo de desajuste:
+    fxis = arrayfun(fn, xis);
+    
+    % Y ya creas la tabla sabiendo que
+    % length(xis)==length(errores)==length(fxis)
     % Guardar resultados en un archivo CSV
     T = table((1:length(xis))', xis', arrayfun(fn, xis)', errores', ...
         'VariableNames', {'Iteración', 'xi', 'f(xi)', 'Error'});

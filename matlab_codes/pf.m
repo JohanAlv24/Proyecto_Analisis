@@ -1,4 +1,5 @@
 function [r, N, xn, fm, E] = pf(f_str, g_str, x0, Tol, niter, tipe)
+    currentDir = fileparts(mfilename('fullpath'));
     f = str2func(['@(x)' f_str]);
     g = str2func(['@(x)' g_str]);
 
@@ -12,6 +13,19 @@ function [r, N, xn, fm, E] = pf(f_str, g_str, x0, Tol, niter, tipe)
     xn(c + 1) = x0;
     fm(c + 1) = f(x0);
     fe = fm(c + 1);
+    if fe == 0
+        r      = sprintf('%f es raíz de f(x)\n', x0);
+        N      = 0;
+        xn     = x0;
+        fm     = f(x0);
+        E      = 0;
+        T = table(0, x0, f(x0), 0, ...
+            'VariableNames', {'Iteration','xn','fxn','E'});
+        tablesDir = fullfile(currentDir, '..', 'app', 'tables');
+        if ~exist(tablesDir,'dir'), mkdir(tablesDir); end
+        writetable(T, fullfile(tablesDir, 'tabla_pf.csv'));
+        return
+    end
     E(c + 1) = Tol + 1;
     error = E(c + 1);
     N(c + 1) = c;
@@ -48,7 +62,7 @@ function [r, N, xn, fm, E] = pf(f_str, g_str, x0, Tol, niter, tipe)
     end
 
     % Guardar los resultados en un archivo CSV
-    currentDir = fileparts(mfilename('fullpath'));
+    
     tablesDir = fullfile(currentDir, '..', 'app', 'tables');
     if ~exist(tablesDir, 'dir')
         mkdir(tablesDir);

@@ -555,24 +555,54 @@ def informe():
             niter = int(request.form['niter'])
             tipe = str(request.form['tipe'])
             
+            # Validar entradas
+            if not f or not g or not x0 or not xi or not xs:
+                raise ValueError("Debe ingresar las funciones f, g, el valor inicial x0 y los valores para el intervalo xi, xs.")
+            if tol <= 0:
+                raise ValueError("La tolerancia debe ser un valor positivo.")
+            if niter <= 0:
+                raise ValueError("El número de iteraciones debe ser un entero positivo.")
+            
 
             try:
                 # Intentar ejecutar MATLAB
-                [r, methods, E, xn, fm, iter] = eng.Informe1(f, g, x0, x1, xi, xs, tol, niter, tipe, nargout=6)
-                N, xn, fm, E = list(N[0]), list(xn[0]), list(fm[0]), list(E[0])
-                length = len(N)
+                [r, methods, E, X1, fX1, iter] = eng.Informe1(f, g, x0, x1, xi, xs, tol, niter, tipe, nargout=6)
                 
-                # Leer la tabla generada por MATLAB
-                df = pd.read_csv(os.path.join(dir_tables, 'tabla_informe1.csv'))
-                df = df.astype(str)
-                data = df.to_dict(orient='records')
-                df.to_excel(os.path.join(dir_tables, 'tabla_informe1.xlsx'), index=False)
+                # Procesar resultados
+                if not np.isnan(X1[0]):
+                    N, X1, fX1, E, r, methods = list(iter), list(X1), list(fX1), list(E), list(r), list(methods)
+                    length = len(N)
+                else:
+                    length = 0
+                # Leer y procesar el archivo CSV generado por MATLAB
+                tabla_path = os.path.join(dir_tables, 'tabla_informe1.csv')
+                if os.path.exists(tabla_path):
+                    df = pd.read_csv(tabla_path)
+                    #size = df.shape[1] - 5
+                    data = df.astype(str).to_dict(orient='records')
+                    data_iter = 0
+                    data_error = 0
+                    
+                    if 'Triunfa' in df['Result'].tolist():
+                        min_error = df[df['Result'].str.contains('Triunfa')].sort_values(by='Error').iloc[0]['Error']
+                        min_iter  = df[df['Result'].str.contains('Triunfa')].sort_values(by='Iteration').iloc[0]['Iteration']
 
-
+                        #Diccionario de métodos con menor iteraciones y menor error
+                        data_iter = df[(df['Iteration']==min_iter)].drop(['Result'], axis=1).astype(str).to_dict(orient='records')
+                        data_error = df[(df['Error']==min_error)].drop(['Result'], axis=1).astype(str).to_dict(orient='records')
+                        
+                    if len(data_iter)==0:
+                        data_iter = 0
+                    if len(data_error)==0:
+                        data_error = 0   
+                else:
+                    data = []
+                    #size = 0
                 return render_template(
                     'Seccion_1/resultado_informe1.html',
-                    r=r, N=N, xn=xn, fm=fm, E=E,
-                    length=length, data=data, f=f
+                    r=r, N=N, xn=X1, fm=fX1, E=E,
+                    length=length, data=data, f=f,
+                    data_iter=data_iter, data_error=data_error
                 )
             except matlab.engine.MatlabExecutionError as matlab_error:
                 # Capturar errores específicos de MATLAB
@@ -581,14 +611,18 @@ def informe():
                     error_message=f"Error en MATLAB: {str(matlab_error)}"
                 )
 
-        except ValueError:
-            return render_template(
-                error_message="Error en los datos ingresados. Por favor verifica los valores."
-            )
-        except Exception as e:
+        except ValueError as ve:
+            error_message = str(ve)
             return render_template(
                 'Seccion_1/formulario_informe1.html',
-                error_message=f"Error en la sintaxis, para mas informacion ir al apartado de ayuda"
+                error_message=error_message
+            )
+        except Exception as e:
+            # Capturar cualquier otro error
+            error_message = "Error de sintaxis, para más información ir al apartado de ayuda."
+            return render_template(
+                'Seccion_1/formulario_informe1.html',
+                error_message=e
             )
 
     # Si es una solicitud GET, renderiza el formulario vacío

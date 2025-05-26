@@ -14,13 +14,19 @@ function [r, N, xn, fm, E] = biseccion(f_str, xi, xs, Tol, niter, tipe)
     E = [];
 
     if fi == 0
+        r  = sprintf('%f es raíz de f(x)', xi);
+        N  = 0;
         xn = xi;
-        E = 0;
-        r = sprintf('%f es raíz de f(x)', xi);
+        fm = f(xi);
+        E  = 0;
+        return;
     elseif fs == 0
+        r  = sprintf('%f es raíz de f(x)', xs);
+        N  = 0;
         xn = xs;
-        E = 0;
-        r = sprintf('%f es raíz de f(x)', xs);
+        fm = f(xs);
+        E  = 0;
+        return;
     elseif fs * fi < 0
         N = 0;
         xm = (xi + xs) / 2;
@@ -64,15 +70,18 @@ function [r, N, xn, fm, E] = biseccion(f_str, xi, xs, Tol, niter, tipe)
         end
     else
         r = sprintf('El intervalo es inadecuado');
-        N_list = [];
-        xn_list = [];
-        fm = [];
-        E = [];
+        N = 0;
+        xn = NaN; 
+        xn_list = NaN;
+        fm = NaN;
+        E = NaN;
     end
     
     % Asignar las listas de iteración y resultados si no están vacías
-    N = N_list;
-    xn = xn_list;
+    if ~isempty(N_list)
+        N = N_list;
+        xn = xn_list;
+    end
 
     % Guardar la tabla de resultados en un archivo CSV solo si el intervalo es adecuado
     if ~isempty(N_list)

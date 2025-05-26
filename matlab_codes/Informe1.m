@@ -2,8 +2,8 @@ function [res, methods, E, X1, fX1, iter] = Informe1(f, g, x0, x1, xi, xs, tol, 
     [res_b, N_b, x1_b, f_b, E_b] = biseccion(f, xi, xs, tol, niter, error_type);
     [res_new, N_new, x1_new, f_new, df_new, E_new, c_new] = newton(f, x0, tol, niter, error_type);
     [res_pf, N_pf, x1_pf, f_pf, E_pf] = pf(f, g, x0, tol, niter, error_type);
-    [res_rm, N_rm, x1_rm, f_rm ,E_rm] = multiple_roots(f, x0, tol, niter, error_type);
-    [res_rf, N_rf, x1_rf, f_rf, E_rf] = ReglaFalsa(f, x0, x1, tol, niter, error_type);
+    [res_rm, N_rm, x1_rm, f_rm ,E_rm] = raices_multiples(f, x0, tol, niter, error_type);
+    [res_rf, N_rf, x1_rf, f_rf, E_rf] = rf(f, x0, x1, tol, niter, error_type);
     [res_sec, N_sec, x1_sec, f_sec, E_sec] = secante(f, x0, x1, tol, niter, error_type);
     
     
@@ -12,11 +12,11 @@ function [res, methods, E, X1, fX1, iter] = Informe1(f, g, x0, x1, xi, xs, tol, 
     X1 = [x1_b(end); x1_new(end); x1_pf(end); x1_rm(end); x1_rf(end); x1_sec(end)];
     E = [E_b(end); E_new(end); E_pf(end); E_rm(end); E_rf(end); E_sec(end)];
     fX1 = [f_b(end); f_new(end); f_pf(end); f_rm(end); f_rf(end); f_sec(end)];
-    iter = [N_b; N_new(end); N_pf(end); N_rm; N_rf; N_sec(end)];
+    iter = [N_b(end); N_new(end)-1; N_pf(end); N_rm; N_rf-1; N_sec(end)-1];
     methods = {'Biseccion'; 'Newton'; 'Punto-fijo'; 'Raices-multiples'; 'Regla-falsa'; 'Secante'};
     
     for i = (1:6)
-        if E(i)<Tol
+        if E(i)<tol
             res{i} = 'Triunfa';
             %r(i) = 1;
         end
