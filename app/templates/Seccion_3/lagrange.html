@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Introducir Matriz</title>
+    <title>Método Lagrange</title>
     <!-- Incluir Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/formulario_3.css') }}">
@@ -75,15 +75,17 @@
 
                 // Limpiar la tabla
                 tabla.innerHTML = '';
+                tabla.align = "center"; 
                 var fila = tabla.insertRow(0);
                 for (var j = 0; j < filas; j++) {
                     var celda = fila.insertCell(j);
                     var input = document.createElement("input");
                     input.type = "number";
                     input.name = "dato[" + j + "]";
+                    input.style.width = "80px";
+                    input.style.textAlign = "center";
                     celda.appendChild(input);
                 }
-
             }
 
             function generarVectory() {
@@ -92,12 +94,15 @@
 
                 // Limpiar la tabla
                 tabla.innerHTML = '';
+                tabla.align = "center"; 
                 var fila = tabla.insertRow(0);
                 for (var j = 0; j < filas; j++) {
                     var celda = fila.insertCell(j);
                     var input = document.createElement("input");
                     input.type = "number";
                     input.name = "dato[" + j + "]";
+                    input.style.width = "80px";
+                    input.style.textAlign = "center";
                     celda.appendChild(input);
                 }
             }

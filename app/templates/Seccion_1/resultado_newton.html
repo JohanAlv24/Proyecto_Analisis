@@ -57,7 +57,8 @@ Resultado de Newton
     <div class="mb-5">
         <h2 class="mb-3">Gráfica</h2>
         <div class="text-center">
-            <img src="{{ imagen_path }}" alt="Gráfica de Newton" class="img-fluid mb-3">
+            <img src="{{ url_for('static', filename='newton.svg') }}" alt="Gráfica de Newton" class="img-fluid mb-3">
+
         </div>
         <div class="text-center mt-3">
             <form action="{{ url_for('seccion_1.descargar_grafica_newton') }}" method="post">

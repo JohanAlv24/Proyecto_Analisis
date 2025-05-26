@@ -64,7 +64,7 @@ def punto_fijo():
                 )
 
         except ValueError:
-            return render_template(
+            return render_template('Seccion_1/formulario_pf.html',
                 error_message="Error en los datos ingresados. Por favor verifica los valores."
             )
         except Exception as e:

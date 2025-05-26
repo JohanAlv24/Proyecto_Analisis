@@ -36,6 +36,8 @@ function [respuesta, c, x1_rf, f_rf, E_rf] = rf(func, x0, x1, Tol, niter, Terror
         x1_rf = xm;
         f_rf = fm;
         E_rf = E;
+        error('ReglaFalsa:IntervaloInvalido', ...
+        'El intervalo es inadecuado: f(x0) * f(x1) >= 0');
         return;
     end
 
@@ -116,7 +118,7 @@ function [respuesta, c, x1_rf, f_rf, E_rf] = rf(func, x0, x1, Tol, niter, Terror
     if ~exist(staticDir, 'dir')
         mkdir(staticDir);
     end
-    svgPath = fullfile(staticDir, [safe_func, '.svg']);
+    svgPath = fullfile(staticDir, ['rf.svg']);
     saveas(fig, svgPath, 'svg');
     disp(['Gráfica SVG generada en: ', svgPath]);
     close(fig);

@@ -3,6 +3,8 @@ import os, json, csv
 import matlab.engine
 import pandas as pd
 import numpy as np
+from fractions import Fraction
+
 
 blueprint = Blueprint('seccion_3', __name__)
 
@@ -173,3 +175,59 @@ def descargar_archivoSpline():
 
     # Enviar el archivo al cliente para descargar
     return send_file(archivo_path, as_attachment=True)
+
+
+@blueprint.route('/informe3', methods=['POST', 'GET'])
+def informe3():
+    if request.method == 'POST':
+    
+        x = json.loads(request.form['x'])
+        y = json.loads(request.form['y'])
+        x_comp, y_comp = x[-1], y[-1]
+        x, y = x[:-1], y[:-1]
+        pares = list(zip(x, y))   
+
+        pares_ordenados = sorted(pares, key=lambda par: par[0])
+
+        x_ordenado, y_ordenado = zip(*pares_ordenados)
+        
+        x = list(x_ordenado)
+        y = list(y_ordenado)
+        n = len(x)
+        x.append(x_comp)
+        y.append(y_comp)
+        
+        eng.addpath(dir_matlab)
+        
+        x = matlab.double(x)
+        y = matlab.double(y)
+    
+        [tabla1, tabla3, polinomios, errores] = eng.Informe3(x, y, nargout=4)
+        polinomios = polinomios[0]
+        errores = errores[0]
+
+        polinomios = [polinomios[i * n:(i + 1) * n] for i in range(3)]
+        print(polinomios)
+        print(errores)
+        
+        etiquetas = ["Lagrange", "Newton", "Vandermonde"]
+
+        polinomios = [
+            [Fraction(c).limit_denominator() for c in pol]
+            for pol in polinomios
+        ]
+    
+        polinomios = dict(zip(etiquetas, polinomios))
+
+        etiquetas_error = etiquetas + ['Spline Lineal', 'Spline Cúbico']
+        menor_error = min(errores)
+        mejor_met = []
+        for i, e in enumerate(errores):
+            if round(e, 5)==round(menor_error, 5):
+                mejor_met.append(etiquetas_error[i])
+        
+        print(mejor_met)
+        # Gráfica
+        return render_template('Seccion_3/resultado_informe3.html', x=x[0], tabla1=tabla1, tabla3=tabla3, polinomios=polinomios, errores=errores, mejor_met=mejor_met)
+
+    return render_template('Seccion_3/informe3.html')

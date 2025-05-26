@@ -3,6 +3,8 @@ import os, json, csv
 import matlab.engine
 import pandas as pd
 import numpy as np
+from numpy.linalg import eigvals
+
 
 blueprint = Blueprint('seccion_2', __name__)
 
@@ -15,6 +17,40 @@ dir_tables = os.path.join(dir_actual, 'tables')
 dir_static = os.path.join(os.path.dirname(__file__), 'static')
 
 eng.addpath(dir_matlab)
+
+# Función para calcular el radio espectral en Python
+def calcular_radio_espectral(A_str):
+    """
+    Verifica si la matriz A es diagonalmente dominante.
+    Si no lo es, calcula el radio espectral.
+    Retorna un diccionario con dos claves:
+    {
+        "diagonal_dominante": bool,
+        "radio_espectral": float
+    }
+    """
+    try:
+        A_clean = A_str.replace('[', '').replace(']', '')
+        filas = A_clean.split(';')
+        A = np.array([list(map(float, fila.split())) for fila in filas])
+        
+        # Verificar si es diagonalmente dominante por filas
+        diagonal = np.abs(A.diagonal())
+        suma_filas = np.sum(np.abs(A), axis=1) - diagonal
+        dominante = np.all(diagonal > suma_filas)
+        
+        # Calcular radio espectral (aunque sea dominante, útil para reporte)
+        autovalores = np.linalg.eigvals(np.eye(len(A)) - np.linalg.inv(np.diag(np.diag(A))) @ A)
+        radio = np.max(np.abs(autovalores))
+        
+        return {
+            "diagonal_dominante": dominante,
+            "radio_espectral": radio
+        }
+        
+    except Exception as e:
+        raise ValueError(f"Error al procesar la matriz A: {str(e)}")
+
 
 #Método de Gauss-Seidel
 #Método de Gauss-Seidel
@@ -38,7 +74,18 @@ def gaussSeidel():
             if niter <= 0:
                 raise ValueError("El número de iteraciones debe ser un entero positivo.")
 
+
             try:
+                resultado = calcular_radio_espectral(A)
+                dominante = resultado["diagonal_dominante"]
+                radio = resultado["radio_espectral"]
+
+                if not dominante and radio >= 1:
+                 return render_template(
+                 'Seccion_2/formulario_gaussSeidel.html',
+                  error_message=f"El método no converge: la matriz no es diagonalmente dominante y el radio espectral es {radio:.4f} ≥ 1."
+                 )
+               
                 # Ejecutar MATLAB
                 eng.addpath(dir_matlab)
                 [r, N, xn, E, re, c] = eng.gaussSeidel(x, A, b, et, tol, niter, nargout=6)
@@ -142,8 +189,21 @@ def jacobi():
                 raise ValueError("La tolerancia debe ser un valor positivo.")
             if niter <= 0:
                 raise ValueError("El número de iteraciones debe ser un entero positivo.")
-
+             # Calcular radio espectral en Python
+        
+           
+            
             try:
+                resultado = calcular_radio_espectral(A)
+                dominante = resultado["diagonal_dominante"]
+                radio = resultado["radio_espectral"]
+
+                if not dominante and radio >= 1:
+                  return render_template(
+                    'Seccion_2/formulario_gaussSeidel.html',
+                       error_message=f"El método no converge: la matriz no es diagonalmente dominante y el radio espectral es {radio:.4f} ≥ 1."
+                  )
+                
                 # Ejecutar MATLAB
                 eng.addpath(dir_matlab)
                 [r, N, xn, E, Re] = eng.jacobi(x, A, b, tol, niter, error_type, nargout=5)
@@ -240,6 +300,16 @@ def sor():
                 raise ValueError("El factor de relajación (w) debe estar entre 0 y 2.")
 
             try:
+                resultado = calcular_radio_espectral(A)
+                dominante = resultado["diagonal_dominante"]
+                radio = resultado["radio_espectral"]
+
+                if not dominante and radio >= 1:
+                 return render_template(
+                 'Seccion_2/formulario_gaussSeidel.html',
+                  error_message=f"El método no converge: la matriz no es diagonalmente dominante y el radio espectral es {radio:.4f} ≥ 1."
+                 )
+
                 # Ejecutar MATLAB
                 eng.addpath(dir_matlab)
                 [r, n, xi, E, radio] = eng.SOR(x0, A, b, Tol, niter, w, tipe, nargout=5)
@@ -334,6 +404,15 @@ def informe():
                 raise ValueError("El número de iteraciones debe ser un entero positivo.")
 
             try:
+                resultado = calcular_radio_espectral(A)
+                dominante = resultado["diagonal_dominante"]
+                radio = resultado["radio_espectral"]
+
+                if not dominante and radio >= 1:
+                 return render_template(
+                 'Seccion_2/formulario_gaussSeidel.html',
+                  error_message=f"El método no converge: la matriz no es diagonalmente dominante y el radio espectral es {radio:.4f} ≥ 1."
+                 )
                 # Ejecutar MATLAB
                 eng.addpath(dir_matlab)
                 [r, methods, E, X1, Re, iter] = eng.Informe2(x, A, b, tol, niter, w1, w2, w3, error_type, nargout=6)

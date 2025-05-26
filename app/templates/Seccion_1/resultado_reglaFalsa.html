@@ -73,7 +73,7 @@ Resultado de Regla Falsa
         <h2 class="mb-3">Gráfica</h2>
         {% if imagen_path %}
         <div class="text-center">
-            <img src="{{ imagen_path }}" alt="Gráfica de Regla Falsa" class="img-fluid mb-3">
+            <img src="{{ url_for('static', filename='rf.svg') }}" alt="Gráfica de Regla Falsa" class="img-fluid mb-3">
         </div>
         {% else %}
         <p class="text-warning text-center">No se pudo generar la gráfica.</p>

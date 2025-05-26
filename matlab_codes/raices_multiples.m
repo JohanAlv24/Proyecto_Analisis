@@ -12,7 +12,11 @@ function [resultado, n, xi, fxi, errores] = raices_multiples(fn_str, xi, tol, k,
     % Inicializar variables
     errores = [tol + 1];
     xis = [xi]; % Inicializar con el valor inicial
+<<<<<<< HEAD
+    err = tol + 1;
+=======
     error = tol+1;
+>>>>>>> 620dd5690dc5e7d19062bd472a6f1f3773ee027f
     n = 0;
     fxi0 = fn(xi);                % Evaluamos f en la semilla
     if fxi0 == 0
@@ -29,7 +33,7 @@ function [resultado, n, xi, fxi, errores] = raices_multiples(fn_str, xi, tol, k,
     end
 
     % Iteración principal del método
-    while error > tol && n < k
+    while err > tol && n < k
         fxi = fn(xi);
         fxi_1 = dfn(xi);
         fxi_2 = ddfn(xi);
@@ -42,13 +46,13 @@ function [resultado, n, xi, fxi, errores] = raices_multiples(fn_str, xi, tol, k,
         xi_1 = xi - (fxi * fxi_1) / (fxi_1^2 - fxi * fxi_2);
 
         if strcmp(et, 'Decimales Correctos')
-            error = abs(xi_1 - xi);
+            err = abs(xi_1 - xi);
         else
-            error = abs(xi_1 - xi) / abs(xi_1);
+            err = abs(xi_1 - xi) / abs(xi_1);
         end
 
         % Actualizar variables
-        errores = [errores, error];
+        errores = [errores, err];
         xis = [xis, xi_1];
         xi = xi_1;
         n = n + 1;
@@ -62,10 +66,11 @@ function [resultado, n, xi, fxi, errores] = raices_multiples(fn_str, xi, tol, k,
     % Determinar el resultado final
     if fn(xi) == 0
         resultado = sprintf('%f es raíz de f(x)\n', xi);
-    elseif error < tol
+    elseif err < tol
         resultado = sprintf('%f es una aproximación de una raíz de f(x) con una tolerancia = %f\n', xi, tol);
     else
-        resultado = sprintf('Fracasó en %d iteraciones\n', k);
+        error('RaicesMultiples:FuncionInvalida', ...
+        'La función f(x) no es válida para este método');
     end
 
     % Graficar resultados
@@ -90,7 +95,7 @@ function [resultado, n, xi, fxi, errores] = raices_multiples(fn_str, xi, tol, k,
     end
 
     % Guardar como SVG
-    svgPath = fullfile(staticDir, [safe_fn_str, '.svg']);
+    svgPath = fullfile(staticDir, ['raices.svg']);
     saveas(fig, svgPath, 'svg');
     disp(['Gráfica SVG generada en: ', svgPath]);
 
