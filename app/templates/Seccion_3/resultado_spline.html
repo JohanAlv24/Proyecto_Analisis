@@ -34,12 +34,13 @@
                         {% for value in p %}
                         <td>{{ value }}</td>
                         {% endfor %}
-                        <th>{{ x[loop.index0] }} ≤ x ≤ {{ x[loop.index0+1] }} </th>
+                        {% set i = loop.index0 %}
+                        <th>{{ x[i] }} ≤ x ≤ {{ x[i + 1] }}</th>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-
+            
             <!-- Mostrar la gráfica generada -->
             <div class="mt-4">
                 <h1>Gráfica del Método Spline:</h1>

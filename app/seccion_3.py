@@ -183,8 +183,8 @@ def informe3():
     
         x = json.loads(request.form['x'])
         y = json.loads(request.form['y'])
-
         x_comp, y_comp = x[-1], y[-1]
+        x, y = x[:-1], y[:-1]
         pares = list(zip(x, y))   
 
         pares_ordenados = sorted(pares, key=lambda par: par[0])
@@ -193,6 +193,7 @@ def informe3():
         
         x = list(x_ordenado)
         y = list(y_ordenado)
+        n = len(x)
         x.append(x_comp)
         y.append(y_comp)
         
@@ -200,11 +201,14 @@ def informe3():
         
         x = matlab.double(x)
         y = matlab.double(y)
-        
-        [polinomios, errores] = eng.Informe3(x, y, nargout=2)
-        polinomios = polinomios.tolist()
-        errores = errores.tolist()
+    
+        [tabla1, tabla3, polinomios, errores] = eng.Informe3(x, y, nargout=4)
+        polinomios = polinomios[0]
         errores = errores[0]
+
+        polinomios = [polinomios[i * n:(i + 1) * n] for i in range(3)]
+        print(polinomios)
+        print(errores)
         
         etiquetas = ["Lagrange", "Newton", "Vandermonde"]
 
@@ -215,16 +219,15 @@ def informe3():
     
         polinomios = dict(zip(etiquetas, polinomios))
 
-        df1 = pd.read_csv(os.path.join(dir_tables,'tabla_spline1.csv'))
-        df1 = df1.astype(str)
-        data1 = df1.to_dict(orient='records')
-
-        df3 = pd.read_csv(os.path.join(dir_tables,'tabla_spline3.csv'))
-        df3 = df3.astype(str)
-        data3 = df3.to_dict(orient='records')
+        etiquetas_error = etiquetas + ['Spline Lineal', 'Spline Cúbico']
+        menor_error = min(errores)
+        mejor_met = []
+        for i, e in enumerate(errores):
+            if round(e, 5)==round(menor_error, 5):
+                mejor_met.append(etiquetas_error[i])
         
-
+        print(mejor_met)
         # Gráfica
-        return render_template('Seccion_3/resultado_informe3.html', data1=data1, data3=data3, polinomios=polinomios, errores=errores)
+        return render_template('Seccion_3/resultado_informe3.html', x=x[0], tabla1=tabla1, tabla3=tabla3, polinomios=polinomios, errores=errores, mejor_met=mejor_met)
 
     return render_template('Seccion_3/informe3.html')

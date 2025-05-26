@@ -1,4 +1,4 @@
-function [tabla1, pol_int, Errores] = Informe3(x,y)
+function [tabla1, tabla3, pol_int, Errores] = Informe3(x,y)
     x_comp = x(end);
     y_comp = y(end);
 
@@ -159,14 +159,14 @@ function [tabla1, pol_int, Errores] = Informe3(x,y)
     pol_int = [pol_lagrange, pol_Newton, pol_vander];
     Errores = [error_lagrange, error_newton, error_vander, error_spline1, error_spline3];
 
-    output_dir = "app/tables";
-    if ~exist(output_dir, 'dir')
-        mkdir(output_dir);
-    end
+    currentDir = fileparts(mfilename('fullpath'));
+    tablesDir = fullfile(currentDir, '..', 'app', 'tables');
+    mkdir(tablesDir);
+    cd(tablesDir);
     
     % Guardar los archivos CSV
-    csv_file_path1 = fullfile(output_dir, "tabla_spline1.csv");
-    csv_file_path3 = fullfile(output_dir, "tabla_spline3.csv");
+    csv_file_path1 = fullfile(tablesDir, "tabla_spline1.csv");
+    csv_file_path3 = fullfile(tablesDir, "tabla_spline3.csv");
     
     writematrix(tabla1, csv_file_path1);
     writematrix(tabla3, csv_file_path3);
