@@ -2,8 +2,6 @@
 % grado d (1, 2, 3) para el conjunto de n datos (x,y), 
 % mediante el método spline.
 function [Tabla] = spline(x,y,d)
-    x = eval(x);
-    y = eval(y);
 
     % Ordenar x y reorganizar y según ese orden
     [x, idx] = sort(x);
@@ -134,10 +132,12 @@ function [Tabla] = spline(x,y,d)
     Tabla = reshape(val, d+1, n-1)';
     
     % Exportar la tabla a un archivo CSV
+
     currentDir = fileparts(mfilename('fullpath'));
     tablesDir = fullfile(currentDir, '..', 'app', 'tables');
     mkdir(tablesDir);
     cd(tablesDir);
+
     csv_file_path = fullfile(tablesDir, 'tabla_spline.csv');
     writematrix(Tabla, csv_file_path);
 

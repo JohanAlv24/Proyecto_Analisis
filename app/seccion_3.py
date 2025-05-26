@@ -142,9 +142,19 @@ def spline():
         y = request.form['y']
         d = int(request.form['d'])
         
+
+        x_list = [float(i.strip()) for i in x.strip("[]").split(',')]
+        y_list = [float(i.strip()) for i in y.strip("[]").split(',')]
+
+        xy_sorted = sorted(zip(x_list, y_list))
+        x_sorted, y_sorted = zip(*xy_sorted)
+
+        x_matlab = matlab.double(x_sorted)
+        y_matlab = matlab.double(y_sorted)
+
         eng.addpath(dir_matlab)
         
-        respuesta = eng.spline(x, y, d)
+        respuesta = eng.spline(x_matlab, y_matlab, float(d))
         print("respuesta",respuesta)
 
         df = pd.read_csv(os.path.join(dir_tables, 'tabla_spline.csv'))
@@ -154,10 +164,8 @@ def spline():
 
         imagen_path = os.path.join('static', 'grafica_spline.png')
 
-        # Eliminar los corchetes al principio y al final del string
-        x = x.strip("[]")
-        # Dividir el string usando la coma como separador
-        x = x.split(',')
+
+        x = [str(i) for i in x_sorted] 
         g = d
         grado = []
         while d > 0:
