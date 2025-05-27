@@ -59,6 +59,10 @@ function [r, N, xn, fm, E] = biseccion(f_str, xi, xs, Tol, niter, tipe)
             err = E(N + 1);
         end
         if fe == 0
+            N = N + 1;
+            xn_list(N) = xm;
+            E(N)        = 0;
+            fm(N)       = fe;
             xn = xm;
             r = sprintf('%f es raíz de f(x)', xm);
         elseif err < Tol

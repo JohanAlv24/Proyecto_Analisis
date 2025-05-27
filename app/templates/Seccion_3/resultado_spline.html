@@ -34,8 +34,8 @@
                         {% for value in p %}
                         <td>{{ value }}</td>
                         {% endfor %}
-                        {% set i = loop.index0 %}
-                        <th>{{ x[i] }} ≤ x ≤ {{ x[i + 1] }}</th>
+                        {% set xi = x|sort %}
+                        <th>{{ x[loop.index0] }} ≤ x ≤ {{ x[loop.index0+1] }} </th>
                     </tr>
                     {% endfor %}
                 </tbody>

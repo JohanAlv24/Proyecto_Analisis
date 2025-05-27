@@ -12,11 +12,9 @@ function [resultado, n, xi, fxi, errores] = raices_multiples(fn_str, xi, tol, k,
     % Inicializar variables
     errores = [tol + 1];
     xis = [xi]; % Inicializar con el valor inicial
-<<<<<<< HEAD
+
     err = tol + 1;
-=======
     error = tol+1;
->>>>>>> 620dd5690dc5e7d19062bd472a6f1f3773ee027f
     n = 0;
     fxi0 = fn(xi);                % Evaluamos f en la semilla
     if fxi0 == 0

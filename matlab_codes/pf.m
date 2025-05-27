@@ -2,6 +2,18 @@ function [r, N, xn, fm, E] = pf(f_str, g_str, x0, Tol, niter, tipe)
     currentDir = fileparts(mfilename('fullpath'));
     f = str2func(['@(x)' f_str]);
     g = str2func(['@(x)' g_str]);
+    % —– Validación de que g es una reordenación de f(x)=0 —–
+    g0 = g(x0);
+    fg0 = f(g0);
+    f0  = f(x0);
+
+    % Si f(g(x0)) no mejora la cercanía a cero, error:
+    if abs(fg0) > abs(f0) || abs(fg0) < abs(f0)
+        error('PuntoFijo:FuncionInvalida', ...
+            ['g(x) no se corresponde con una función de punto fijo de f(x)=0. ', ...
+            'En x0=%g, |f(g(x0))|=%.3g ≥ |f(x0)|=%.3g'], ...
+            x0, abs(fg0), abs(f0));
+    end
 
     % Inicializar variables como vectores
     fm = zeros(1, niter + 1);
